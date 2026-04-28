@@ -436,6 +436,7 @@ const app = initializeApp({
 
 const auth = getAuth(app);
 const db   = getFirestore(app);
+window.db = db;
 
 window.firebaseSignOut = () => signOut(auth);
 onAuthStateChanged(auth, user => {
