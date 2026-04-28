@@ -2,310 +2,398 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>T.U.L.O.N.G. — Operator Dashboard</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
-/* ── RESET & BASE ── */
+/* ── RESET & CSS VARS ────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-    --bg:       #020c1b;
-    --panel:    #030f20;
-    --border:   #0d2137;
-    --accent:   #1a8cff;
-    --red:      #ff4d4d;
-    --green:    #27ae60;
-    --amber:    #f0883e;
-    --yellow:   #ffcc00;
-    --text:     #c9d1d9;
-    --muted:    #4a5568;
-    --card:     #050f1f;
+    --bg:      #020c1b;
+    --panel:   #030f20;
+    --border:  #0d2137;
+    --accent:  #1a8cff;
+    --red:     #ff4d4d;
+    --green:   #27ae60;
+    --amber:   #f0883e;
+    --yellow:  #ffcc00;
+    --text:    #c9d1d9;
+    --muted:   #4a5568;
+    --card:    #050f1f;
+    --nav-h:   60px;
+    --hdr-h:   56px;
 }
-body {
+html, body {
+    height: 100%; overflow: hidden;
     background: var(--bg); color: var(--text);
     font-family: 'Open Sans', sans-serif;
-    height: 100vh; overflow: hidden;
-    display: flex; flex-direction: column;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* ── SCANLINE OVERLAY ── */
+/* scanline texture */
 body::before {
-    content: ''; position: fixed; inset: 0; pointer-events: none;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
-    z-index: 9999;
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:9998;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
 }
 
-/* ── HEADER ── */
+/* ── HEADER ─────────────────────────────────────────── */
 .header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 24px; height: 64px; flex-shrink: 0;
-    background: linear-gradient(180deg, rgba(1,26,51,0.98) 0%, rgba(2,12,27,0.98) 100%);
+    position: fixed; top:0; left:0; right:0; height: var(--hdr-h);
+    z-index: 1000;
+    background: linear-gradient(180deg,rgba(1,22,44,0.98) 0%,rgba(2,12,27,0.98) 100%);
     border-bottom: 1px solid var(--border);
-    position: relative; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px; gap: 10px;
 }
 .header::after {
-    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+    background: linear-gradient(90deg,transparent,var(--accent),transparent);
 }
-.header-left { display: flex; align-items: center; gap: 14px; }
+.hdr-left { display:flex; align-items:center; gap:8px; min-width:0; }
 .logo-badge {
-    background: linear-gradient(135deg, #8b0000, #cc0000);
-    color: #fff; font-family: 'Rajdhani', sans-serif; font-weight: 700;
-    font-size: 13px; letter-spacing: 3px; padding: 5px 12px; border-radius: 4px;
-    border: 1px solid rgba(255,77,77,0.3); white-space: nowrap;
+    background: linear-gradient(135deg,#8b0000,#cc0000);
+    color:#fff; font-family:'Rajdhani',sans-serif; font-weight:700;
+    font-size:11px; letter-spacing:2px; padding:4px 9px; border-radius:4px;
+    border:1px solid rgba(255,77,77,0.3); white-space:nowrap; flex-shrink:0;
 }
-.header-title { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 2px; }
-.header-title span { color: var(--accent); }
-
-.header-center { text-align: center; }
-.live-clock {
-    font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700;
-    letter-spacing: 4px; color: #fff; line-height: 1;
+.hdr-title {
+    font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700;
+    letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.live-date { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
-
-.header-right { display: flex; align-items: center; gap: 14px; }
-.user-badge {
-    display: flex; align-items: center; gap: 10px;
-    background: rgba(26,140,255,0.08); border: 1px solid rgba(26,140,255,0.2);
-    border-radius: 8px; padding: 8px 14px;
+.hdr-title span { color:var(--accent); }
+.hdr-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.hdr-clock {
+    font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700;
+    letter-spacing:3px; color:#fff; display:none; /* hidden on smallest screens */
+}
+.user-mini {
+    display:flex; align-items:center; gap:7px;
+    background: rgba(26,140,255,0.08); border:1px solid rgba(26,140,255,0.2);
+    border-radius:7px; padding:5px 10px;
 }
 .user-avatar {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), #0066cc);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px;
+    width:28px; height:28px; border-radius:50%;
+    background: linear-gradient(135deg,var(--accent),#0066cc);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;
 }
-.user-info { line-height: 1.3; }
-.user-name { font-size: 12px; font-weight: 700; color: #fff; }
-.user-unit { font-size: 10px; color: var(--accent); letter-spacing: 1px; }
-.logout-btn {
-    background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.3);
-    color: var(--red); border-radius: 6px; padding: 8px 14px;
-    font-size: 11px; font-weight: 700; letter-spacing: 1px; cursor: pointer;
-    text-transform: uppercase; transition: all 0.2s;
+.user-name-hdr { font-size:11px; font-weight:700; color:#fff; }
+.user-unit-hdr { font-size:9px; color:var(--accent); letter-spacing:.5px; margin-top:1px; }
+.logout-btn-hdr {
+    background: rgba(255,77,77,0.08); border:1px solid rgba(255,77,77,0.3);
+    color:var(--red); border-radius:6px; padding:6px 10px;
+    font-size:10px; font-weight:700; letter-spacing:1px; cursor:pointer;
+    text-transform:uppercase; transition:all 0.2s; white-space:nowrap;
 }
-.logout-btn:hover { background: rgba(255,77,77,0.2); }
+.logout-btn-hdr:hover { background:rgba(255,77,77,0.2); }
 
-/* ── STATUS RIBBON ── */
-.status-ribbon {
-    display: flex; align-items: stretch; gap: 0;
-    height: 52px; flex-shrink: 0;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
+/* ── STATS RIBBON (horizontal scroll) ─────────────── */
+.stats-ribbon {
+    position: fixed; top: var(--hdr-h); left:0; right:0;
+    height: 50px; z-index: 900;
+    background: var(--panel); border-bottom:1px solid var(--border);
+    display: flex; align-items:stretch;
+    overflow-x: auto; overflow-y:hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
+.stats-ribbon::-webkit-scrollbar { display:none; }
 .stat-pill {
-    display: flex; align-items: center; gap: 10px;
-    padding: 0 24px; border-right: 1px solid var(--border);
-    flex: 1; position: relative; overflow: hidden;
+    display:flex; align-items:center; gap:7px;
+    padding: 0 16px; border-right:1px solid var(--border);
+    flex-shrink:0; position:relative;
 }
-.stat-pill::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.01));
+.stat-icon { font-size:15px; }
+.stat-num {
+    font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; line-height:1;
 }
-.stat-icon { font-size: 18px; }
-.stat-info { line-height: 1.2; }
-.stat-num { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; line-height: 1; }
-.stat-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); }
-.stat-num.red    { color: var(--red); }
-.stat-num.blue   { color: var(--accent); }
-.stat-num.green  { color: var(--green); }
-.stat-num.yellow { color: var(--yellow); }
+.stat-lbl { font-size:8px; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); }
+.stat-num.red    { color:var(--red); }
+.stat-num.blue   { color:var(--accent); }
+.stat-num.green  { color:var(--green); }
+.stat-num.yellow { color:var(--yellow); }
 
-/* ── MAIN LAYOUT ── */
-.main { display: flex; flex: 1; overflow: hidden; }
-
-/* ── MAP ── */
-#map { flex: 1; height: 100%; }
-
-/* ── RIGHT PANEL ── */
-.right-panel {
-    width: 280px; flex-shrink: 0;
-    background: var(--panel); border-left: 1px solid var(--border);
-    display: flex; flex-direction: column; overflow: hidden;
+/* ── PAGE LAYOUT ─────────────────────────────────── */
+.page-container {
+    position: fixed;
+    top: calc(var(--hdr-h) + 50px);
+    bottom: var(--nav-h);
+    left: 0; right: 0;
+    overflow: hidden;
 }
 
-/* ── PANEL SECTIONS ── */
-.panel-section {
-    border-bottom: 1px solid var(--border); overflow: hidden;
-    display: flex; flex-direction: column;
+/* ── TAB VIEWS ─────────────────────────────────── */
+.tab-view {
+    position: absolute; inset:0;
+    display: none; flex-direction:column;
+    overflow: hidden;
 }
-.panel-section.grow { flex: 1; }
-.panel-hdr {
-    padding: 10px 16px; flex-shrink: 0;
-    background: rgba(26,140,255,0.04);
-    display: flex; align-items: center; justify-content: space-between;
-}
-.panel-hdr-title {
-    font-family: 'Rajdhani', sans-serif; font-weight: 700;
-    font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
-    display: flex; align-items: center; gap: 6px;
-}
-.panel-hdr-count {
-    font-size: 10px; background: rgba(26,140,255,0.15); color: var(--accent);
-    padding: 2px 8px; border-radius: 10px; font-weight: 700;
-}
-.panel-body { flex: 1; overflow-y: auto; padding: 8px; }
-.panel-body::-webkit-scrollbar { width: 3px; }
-.panel-body::-webkit-scrollbar-track { background: transparent; }
-.panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.tab-view.active { display:flex; }
 
-/* ── UNIT CARDS ── */
+/* MAP TAB */
+#tab-map { position:relative; }
+#map { width:100%; height:100%; }
+.map-blynk-bar {
+    position:absolute; bottom:10px; left:10px; z-index:500;
+    background:rgba(2,12,27,0.88); border:1px solid var(--border);
+    border-radius:4px; padding:4px 10px; font-size:9px; color:var(--muted);
+    display:flex; align-items:center; gap:5px;
+}
+.b-dot { width:6px; height:6px; border-radius:50%; background:var(--muted); flex-shrink:0; }
+.b-dot.on  { background:var(--green); box-shadow:0 0 5px var(--green); animation:pulse 2s infinite; }
+.b-dot.off { background:var(--red); }
+.map-overlay-counter {
+    background:rgba(2,12,27,0.92); border:1px solid var(--border);
+    border-radius:8px; padding:11px 14px; min-width:155px;
+    backdrop-filter:blur(8px);
+}
+.ov-title { font-size:8px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:8px; }
+.ov-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+.ov-label { font-size:10px; color:var(--text); }
+.ov-val { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; }
+.ov-divider { border:0; border-top:1px solid var(--border); margin:8px 0; }
+
+/* SCROLLABLE PANEL CONTENT */
+.panel-scroll {
+    flex:1; overflow-y:auto; padding:10px;
+    -webkit-overflow-scrolling: touch;
+}
+.panel-scroll::-webkit-scrollbar { width:2px; }
+.panel-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* Section headers inside panels */
+.section-hdr {
+    font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700;
+    letter-spacing:2px; text-transform:uppercase; color:var(--accent);
+    padding: 8px 4px 6px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--border); margin-bottom:8px;
+}
+.section-count {
+    font-size:10px; background:rgba(26,140,255,0.15); color:var(--accent);
+    padding:1px 8px; border-radius:10px; font-weight:700;
+}
+
+/* ── UNIT CARDS ─────────────────────────────────── */
 .unit-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-left: 3px solid var(--border);
-    border-radius: 6px; padding: 10px 12px; margin-bottom: 6px;
-    cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden;
+    background:var(--card); border:1px solid var(--border);
+    border-left:3px solid var(--border);
+    border-radius:7px; padding:10px 12px; margin-bottom:7px;
+    cursor:pointer; transition:all 0.15s;
 }
-.unit-card::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.01));
-}
-.unit-card:hover { border-color: var(--accent); transform: translateX(2px); }
-.unit-card.responding { border-left-color: var(--amber); }
-.unit-card.arrived    { border-left-color: var(--red); }
-.unit-card.standby    { border-left-color: var(--green); }
-.unit-card.offline    { border-left-color: var(--muted); opacity: 0.55; }
-
-.uc-top { display: flex; justify-content: space-between; align-items: center; }
-.uc-id  { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+.unit-card:active { opacity:.8; }
+.unit-card.responding { border-left-color:var(--amber); }
+.unit-card.arrived    { border-left-color:var(--red); }
+.unit-card.standby    { border-left-color:var(--green); }
+.unit-card.offline    { border-left-color:var(--muted); opacity:.5; }
+.uc-top { display:flex; justify-content:space-between; align-items:center; }
+.uc-id  { font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700; color:#fff; }
 .uc-badge {
-    font-size: 8px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
-    text-transform: uppercase; letter-spacing: 1px;
+    font-size:8px; font-weight:700; padding:2px 8px; border-radius:10px;
+    text-transform:uppercase; letter-spacing:1px;
 }
-.badge-standby    { background: rgba(39,174,96,0.15);  color: var(--green); }
-.badge-responding { background: rgba(240,136,62,0.15); color: var(--amber); }
-.badge-arrived    { background: rgba(255,77,77,0.15);  color: var(--red); }
-.badge-offline    { background: rgba(74,85,104,0.2);   color: var(--muted); }
-.uc-type { font-size: 10px; color: var(--muted); margin-top: 3px; }
-.uc-gps  { font-size: 9px; color: #3a5a7a; margin-top: 2px; font-family: 'Courier New', monospace; }
+.badge-standby    { background:rgba(39,174,96,.15);  color:var(--green); }
+.badge-responding { background:rgba(240,136,62,.15); color:var(--amber); }
+.badge-arrived    { background:rgba(255,77,77,.15);  color:var(--red); }
+.badge-offline    { background:rgba(74,85,104,.2);   color:var(--muted); }
+.uc-type { font-size:10px; color:var(--muted); margin-top:3px; }
+.uc-gps  { font-size:9px; color:#3a5a7a; margin-top:2px; font-family:'Courier New',monospace; }
 
-/* ── PULSE INDICATOR ── */
+/* ── MY VEHICLE CARD ─────────────────────────────── */
+.my-vehicle-card {
+    background: linear-gradient(135deg,rgba(26,140,255,.07),rgba(26,140,255,.02));
+    border:1px solid rgba(26,140,255,.25); border-radius:9px;
+    padding:14px; margin-bottom:12px;
+}
+.mv-title {
+    font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700;
+    letter-spacing:2px; color:var(--accent); margin-bottom:10px;
+    display:flex; align-items:center; gap:6px;
+}
+.mv-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;
+}
+.mv-field { background:rgba(0,0,0,.3); border-radius:5px; padding:7px 9px; }
+.mv-field-label { font-size:8px; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:2px; }
+.mv-field-value { font-size:12px; font-weight:700; color:#fff; }
+.mv-field.full { grid-column:1/-1; }
+.mv-status-bar { display:flex; gap:5px; }
+.mv-status-btn {
+    flex:1; padding:7px 4px; border-radius:5px; border:1px solid var(--border);
+    font-size:9px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+    background:var(--card); color:var(--muted); text-align:center;
+}
+.mv-status-btn.active-standby    { border-color:var(--green); color:var(--green); background:rgba(39,174,96,.1); }
+.mv-status-btn.active-responding { border-color:var(--amber); color:var(--amber); background:rgba(240,136,62,.1); }
+.mv-status-btn.active-arrived    { border-color:var(--red);   color:var(--red);   background:rgba(255,77,77,.1); }
+
+/* ── PULSE DOTS ─────────────────────────────────── */
 .pulse-dot {
-    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-    background: var(--green); margin-right: 4px; vertical-align: middle;
-    animation: pulse 2s ease infinite;
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--green); vertical-align:middle;
+    animation:pulse 2s ease infinite;
 }
 @keyframes pulse {
-    0%,100% { opacity: 1; box-shadow: 0 0 4px var(--green); }
-    50%      { opacity: 0.4; box-shadow: none; }
+    0%,100% { opacity:1; box-shadow:0 0 4px var(--green); }
+    50%      { opacity:.4; box-shadow:none; }
 }
-.pulse-dot.amber  { background: var(--amber); animation-name: pulse-amber; }
+.pulse-dot.amber { background:var(--amber); animation-name:pulse-amber; }
 @keyframes pulse-amber {
-    0%,100% { opacity: 1; box-shadow: 0 0 4px var(--amber); }
-    50%      { opacity: 0.4; }
-}
-.pulse-dot.red    { background: var(--red); animation-name: pulse-red; }
-@keyframes pulse-red {
-    0%,100% { opacity: 1; box-shadow: 0 0 6px var(--red); }
-    50%      { opacity: 0.4; }
+    0%,100% { opacity:1; box-shadow:0 0 4px var(--amber); }
+    50%      { opacity:.4; }
 }
 
-/* ── INCIDENT ITEMS ── */
+/* ── INCIDENT ITEMS ─────────────────────────────── */
 .incident-item {
-    background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-    padding: 10px 12px; margin-bottom: 6px; cursor: pointer; transition: all 0.15s;
+    background:var(--card); border:1px solid var(--border); border-radius:7px;
+    padding:10px 12px; margin-bottom:7px; cursor:pointer; transition:all 0.15s;
 }
-.incident-item:hover { border-color: rgba(255,204,0,0.4); }
-.inc-top { display: flex; justify-content: space-between; align-items: flex-start; }
-.inc-type { font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; }
-.inc-type.fire { color: #ff6633; }
-.inc-type.med  { color: var(--accent); }
-.inc-id   { font-size: 9px; color: var(--muted); font-family: 'Courier New', monospace; }
-.inc-addr { font-size: 10px; color: var(--text); margin-top: 4px; line-height: 1.4; }
-.inc-meta { display: flex; gap: 10px; margin-top: 6px; }
+.incident-item:active { opacity:.8; }
+.inc-top { display:flex; justify-content:space-between; align-items:flex-start; }
+.inc-type { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; }
+.inc-type.fire { color:#ff6633; }
+.inc-type.med  { color:var(--accent); }
+.inc-id   { font-size:9px; color:var(--muted); font-family:'Courier New',monospace; }
+.inc-addr { font-size:10px; color:var(--text); margin-top:4px; line-height:1.4; }
+.inc-meta { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
 .inc-tag  {
-    font-size: 9px; padding: 2px 8px; border-radius: 10px; font-weight: 600;
-    background: rgba(255,204,0,0.1); color: var(--yellow); border: 1px solid rgba(255,204,0,0.2);
+    font-size:9px; padding:2px 8px; border-radius:10px; font-weight:600;
+    background:rgba(255,204,0,.1); color:var(--yellow); border:1px solid rgba(255,204,0,.2);
 }
 
-/* ── STATION ITEMS ── */
+/* ── STATION ITEMS ─────────────────────────────── */
 .station-item {
-    background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-    padding: 10px 12px; margin-bottom: 6px; cursor: pointer; transition: all 0.15s;
+    background:var(--card); border:1px solid var(--border); border-radius:7px;
+    padding:10px 12px; margin-bottom:7px; cursor:pointer; transition:all 0.15s;
 }
-.station-item:hover { border-color: rgba(26,140,255,0.4); transform: translateX(2px); }
-.stn-name { font-size: 11px; font-weight: 700; color: #fff; line-height: 1.3; }
-.stn-meta { font-size: 9px; color: var(--muted); margin-top: 3px; }
+.station-item:active { opacity:.8; }
+.stn-name { font-size:11px; font-weight:700; color:#fff; line-height:1.3; }
+.stn-meta { font-size:9px; color:var(--muted); margin-top:3px; }
 .stn-type-badge {
-    display: inline-block; font-size: 8px; font-weight: 700; padding: 1px 6px;
-    border-radius: 3px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;
+    display:inline-block; font-size:8px; font-weight:700; padding:1px 6px;
+    border-radius:3px; text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;
 }
-.stn-bfp { background: rgba(255,77,77,0.15); color: var(--red); }
-.stn-vol { background: rgba(26,140,255,0.15); color: var(--accent); }
+.stn-bfp { background:rgba(255,77,77,.15);  color:var(--red); }
+.stn-vol { background:rgba(26,140,255,.15); color:var(--accent); }
 
-/* ── MAP OVERLAYS ── */
-.map-overlay-counter {
-    background: rgba(2,12,27,0.92); border: 1px solid var(--border);
-    border-radius: 8px; padding: 14px 18px; min-width: 180px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+/* ── EMPTY STATE ─────────────────────────────────── */
+.empty-state { text-align:center; padding:28px 12px; color:var(--muted); font-size:11px; }
+.empty-state-icon { font-size:28px; margin-bottom:8px; opacity:.4; }
+
+/* ── BOTTOM NAV ─────────────────────────────────── */
+.bottom-nav {
+    position: fixed; bottom:0; left:0; right:0;
+    height: var(--nav-h); z-index:1001;
+    background: rgba(3,15,32,0.97);
+    border-top:1px solid var(--border);
+    display: flex; align-items:stretch;
+    backdrop-filter: blur(12px);
 }
-.ov-title { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
-.ov-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.ov-label { font-size: 11px; color: var(--text); }
-.ov-val   { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; }
-.ov-divider { border: 0; border-top: 1px solid var(--border); margin: 10px 0; }
-
-/* ── MY VEHICLE PANEL ── */
-.my-vehicle-panel {
-    background: linear-gradient(135deg, rgba(26,140,255,0.06), rgba(26,140,255,0.02));
-    border: 1px solid rgba(26,140,255,0.2); border-radius: 8px;
-    padding: 14px; margin: 8px;
+.bottom-nav::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background: linear-gradient(90deg,transparent,rgba(26,140,255,.4),transparent);
 }
-.mv-title { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--accent); margin-bottom: 10px; }
-.mv-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 11px; }
-.mv-key { color: var(--muted); }
-.mv-val { color: #fff; font-weight: 600; }
-.mv-status-bar {
-    display: flex; gap: 4px; margin-top: 10px;
+.nav-tab {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:3px;
+    cursor:pointer; position:relative; transition:all 0.2s;
+    border:none; background:none; color:var(--muted);
+    -webkit-tap-highlight-color:transparent;
 }
-.mv-status-btn {
-    flex: 1; padding: 7px 4px; border-radius: 4px; border: 1px solid var(--border);
-    font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-    background: var(--card); color: var(--muted); cursor: default; text-align: center;
+.nav-tab::after {
+    content:''; position:absolute; top:0; left:20%; right:20%; height:2px;
+    background:var(--accent); border-radius:0 0 2px 2px;
+    transform:scaleX(0); transition:transform 0.25s ease;
 }
-.mv-status-btn.active-standby    { border-color: var(--green); color: var(--green); background: rgba(39,174,96,0.1); }
-.mv-status-btn.active-responding { border-color: var(--amber); color: var(--amber); background: rgba(240,136,62,0.1); }
-.mv-status-btn.active-arrived    { border-color: var(--red);   color: var(--red);   background: rgba(255,77,77,0.1); }
-
-/* ── BLYNK STATUS ── */
-.blynk-status {
-    position: absolute; bottom: 10px; left: 10px; z-index: 500;
-    background: rgba(2,12,27,0.88); border: 1px solid var(--border);
-    border-radius: 4px; padding: 5px 12px; font-size: 10px; color: var(--muted);
-    display: flex; align-items: center; gap: 6px;
+.nav-tab.active { color:var(--accent); }
+.nav-tab.active::after { transform:scaleX(1); }
+.nav-tab-icon { font-size:18px; line-height:1; }
+.nav-tab-label { font-size:8px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+.nav-badge {
+    position:absolute; top:8px; right:calc(50% - 14px);
+    background:var(--red); color:#fff; font-size:8px; font-weight:700;
+    width:14px; height:14px; border-radius:50%; display:none;
+    align-items:center; justify-content:center;
 }
-.b-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-.b-dot.on  { background: var(--green); box-shadow: 0 0 5px var(--green); animation: pulse 2s infinite; }
-.b-dot.off { background: var(--red); }
+.nav-badge.visible { display:flex; }
 
-/* ── EMPTY STATE ── */
-.empty-state { text-align: center; padding: 24px 12px; color: var(--muted); font-size: 11px; }
-.empty-state-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.4; }
-
-/* ── LEAFLET POPUP STYLE ── */
-.leaflet-popup-content-wrapper { background: #030f20 !important; border: 1px solid #1a8cff44 !important; color: #c9d1d9 !important; border-radius: 8px !important; }
-.leaflet-popup-tip-container .leaflet-popup-tip { background: #030f20 !important; }
-
-/* ── NOTIFICATION TOAST ── */
-.toast-container { position: fixed; top: 72px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+/* ── TOAST ─────────────────────────────────────── */
+.toast-container {
+    position:fixed; top:calc(var(--hdr-h) + 56px); right:10px;
+    z-index:9999; display:flex; flex-direction:column; gap:6px; pointer-events:none;
+    max-width: calc(100vw - 20px);
+}
 .toast {
-    background: var(--panel); border: 1px solid var(--border);
-    border-left: 3px solid var(--accent); border-radius: 6px;
-    padding: 12px 16px; min-width: 280px; max-width: 360px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    animation: toastIn 0.3s ease;
-    pointer-events: all;
+    background:var(--panel); border:1px solid var(--border);
+    border-left:3px solid var(--accent); border-radius:7px;
+    padding:10px 14px; width:260px; max-width:100%;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);
+    animation:toastIn .3s ease; pointer-events:all;
 }
-.toast.fire { border-left-color: var(--red); }
-.toast.med  { border-left-color: var(--accent); }
-@keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-.toast-title { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
-.toast-body  { font-size: 10px; color: var(--muted); }
+.toast.fire { border-left-color:var(--red); }
+.toast.med  { border-left-color:var(--accent); }
+@keyframes toastIn { from{transform:translateX(110%);opacity:0;} to{transform:translateX(0);opacity:1;} }
+.toast-title { font-size:12px; font-weight:700; margin-bottom:2px; }
+.toast-body  { font-size:10px; color:var(--muted); }
+
+/* ── LEAFLET POPUP ─────────────────────────────── */
+.leaflet-popup-content-wrapper { background:#030f20 !important; border:1px solid #1a8cff44 !important; color:#c9d1d9 !important; border-radius:8px !important; }
+.leaflet-popup-tip { background:#030f20 !important; }
+
+/* ══════════════════════════════════════════════════
+   DESKTOP: restore original side-panel layout
+   ══════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+    :root { --hdr-h: 64px; --nav-h: 0px; }
+    .hdr-clock { display:block; }
+    .bottom-nav { display:none; }
+    .page-container {
+        bottom: 0;
+        display:flex; flex-direction:row;
+    }
+    .tab-view { position:relative; display:none !important; }
+    #tab-map  { display:flex !important; flex:1; }
+
+    /* Desktop right panel — always visible */
+    .desktop-right {
+        display:flex !important;
+        width:280px; flex-shrink:0;
+        background:var(--panel); border-left:1px solid var(--border);
+        flex-direction:column; overflow:hidden;
+    }
+    .desktop-section {
+        border-bottom:1px solid var(--border);
+        display:flex; flex-direction:column;
+    }
+    .desktop-section.grow { flex:1; overflow:hidden; }
+    .desktop-panel-hdr {
+        padding:9px 14px; flex-shrink:0;
+        background:rgba(26,140,255,.04);
+        display:flex; align-items:center; justify-content:space-between;
+    }
+    .desktop-panel-hdr-title {
+        font-family:'Rajdhani',sans-serif; font-weight:700;
+        font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--accent);
+        display:flex; align-items:center; gap:6px;
+    }
+    .desktop-count {
+        font-size:10px; background:rgba(26,140,255,.15); color:var(--accent);
+        padding:2px 8px; border-radius:10px; font-weight:700;
+    }
+    .desktop-scroll { flex:1; overflow-y:auto; padding:8px; }
+    .desktop-scroll::-webkit-scrollbar { width:3px; }
+    .desktop-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+    .my-vehicle-card { margin:8px; border-radius:8px; }
+    .stats-ribbon .stat-pill { padding:0 20px; }
+    .stats-ribbon { overflow-x:hidden; }
+}
+@media (min-width:768px) {
+    .desktop-right { display:flex; }
+}
+.desktop-right { display:none; }
 </style>
 </head>
 <body>
@@ -326,163 +414,240 @@ const app  = initializeApp({
 });
 const auth = getAuth(app);
 const db   = getFirestore(app);
-
 window._fbSignOut = () => signOut(auth);
 
 onAuthStateChanged(auth, async user => {
     if (!user) { window.location.href = 'login.html'; return; }
-
-    // Fetch user profile from Firestore
     try {
         const snap = await getDoc(doc(db, 'users', user.uid));
         const data = snap.exists() ? snap.data() : {};
-        window.currentUser = { uid: user.uid, email: user.email, name: data.name || user.displayName || user.email, ...data };
-
-        // Fetch vehicle record linked to this user
+        window.currentUser = { uid:user.uid, email:user.email, name:data.name||user.displayName||user.email, ...data };
         if (data.unitId) {
             const vSnap = await getDoc(doc(db, 'vehicles', data.unitId));
             if (vSnap.exists()) window.myVehicle = vSnap.data();
         }
         window.dispatchEvent(new Event('userReady'));
     } catch(e) {
-        window.currentUser = { name: user.displayName || user.email, email: user.email };
+        window.currentUser = { name: user.displayName||user.email, email:user.email };
         window.dispatchEvent(new Event('userReady'));
     }
 });
 </script>
 
-<!-- HEADER -->
+<!-- ── HEADER ──────────────────────────────────────── -->
 <header class="header">
-    <div class="header-left">
-        <img src="tulonglogo.png" style="height:38px;" onerror="this.style.display='none'"/>
+    <div class="hdr-left">
+        <img src="tulonglogo.png" style="height:34px;flex-shrink:0;" onerror="this.style.display='none'"/>
         <div class="logo-badge">T.U.L.O.N.G.</div>
-        <div class="header-title">Operator <span>Dashboard</span></div>
+        <div class="hdr-title">Operator <span>Dashboard</span></div>
     </div>
-    <div class="header-center">
-        <div class="live-clock" id="clock">--:--:--</div>
-        <div class="live-date"  id="date-lbl">Loading...</div>
-    </div>
-    <div class="header-right">
-        <div class="user-badge">
+    <div class="hdr-right">
+        <div class="hdr-clock" id="clock">--:--:--</div>
+        <div class="user-mini">
             <div class="user-avatar" id="user-avatar">?</div>
-            <div class="user-info">
-                <div class="user-name" id="user-name">Loading...</div>
-                <div class="user-unit" id="user-unit">Unit: ---</div>
+            <div>
+                <div class="user-name-hdr" id="user-name">Loading...</div>
+                <div class="user-unit-hdr" id="user-unit">Unit: ---</div>
             </div>
         </div>
-        <button class="logout-btn" onclick="confirmLogout()">&#x2715; Logout</button>
+        <button class="logout-btn-hdr" onclick="confirmLogout()">&#x2715; Logout</button>
     </div>
 </header>
 
-<!-- STATUS RIBBON -->
-<div class="status-ribbon">
+<!-- ── STATS RIBBON ────────────────────────────────── -->
+<div class="stats-ribbon">
     <div class="stat-pill">
         <div class="stat-icon">🚒</div>
-        <div class="stat-info">
+        <div>
             <div class="stat-num red" id="stat-trucks">0</div>
-            <div class="stat-lbl">Firetrucks Online</div>
+            <div class="stat-lbl">Firetrucks</div>
         </div>
     </div>
     <div class="stat-pill">
         <div class="stat-icon">🚑</div>
-        <div class="stat-info">
+        <div>
             <div class="stat-num blue" id="stat-ambs">0</div>
-            <div class="stat-lbl">Ambulances Online</div>
+            <div class="stat-lbl">Ambulances</div>
         </div>
     </div>
     <div class="stat-pill">
         <div class="stat-icon">🔥</div>
-        <div class="stat-info">
+        <div>
             <div class="stat-num yellow" id="stat-fire">0</div>
-            <div class="stat-lbl">Fire Incidents</div>
+            <div class="stat-lbl">Fire</div>
         </div>
     </div>
     <div class="stat-pill">
         <div class="stat-icon">⚕️</div>
-        <div class="stat-info">
+        <div>
             <div class="stat-num yellow" id="stat-med">0</div>
-            <div class="stat-lbl">Medical Incidents</div>
+            <div class="stat-lbl">Medical</div>
         </div>
     </div>
     <div class="stat-pill">
         <div class="stat-icon">🏥</div>
-        <div class="stat-info">
-            <div class="stat-num green" id="stat-stations">32</div>
-            <div class="stat-lbl">Nearby Stations</div>
+        <div>
+            <div class="stat-num green" id="stat-stations">20</div>
+            <div class="stat-lbl">Stations</div>
+        </div>
+    </div>
+    <div class="stat-pill">
+        <div class="stat-icon">📡</div>
+        <div>
+            <div class="stat-num blue" id="stat-online">0</div>
+            <div class="stat-lbl">Units Live</div>
         </div>
     </div>
 </div>
 
-<!-- MAIN -->
-<div class="main">
-    <!-- MAP -->
-    <div style="position:relative;flex:1;height:100%;">
+<!-- ── PAGE CONTAINER ─────────────────────────────── -->
+<div class="page-container">
+
+    <!-- MAP TAB (always visible on desktop) -->
+    <div class="tab-view active" id="tab-map">
         <div id="map" style="width:100%;height:100%;"></div>
-        <div class="blynk-status">
+        <div class="map-blynk-bar">
             <div class="b-dot" id="b-dot"></div>
             <span id="b-label">Connecting...</span>
         </div>
     </div>
 
-    <!-- RIGHT PANEL -->
-    <div class="right-panel">
-
-        <!-- MY VEHICLE -->
-        <div class="panel-section" id="my-vehicle-section" style="display:none;">
-            <div class="panel-hdr">
-                <div class="panel-hdr-title">🚗 My Vehicle</div>
-                <div class="panel-hdr-count" id="my-unit-badge">---</div>
-            </div>
-            <div class="my-vehicle-panel" id="mv-panel">
-                <div class="mv-title">&#9632; UNIT STATUS</div>
-                <div class="mv-row"><span class="mv-key">Unit ID</span><span class="mv-val" id="mv-id">---</span></div>
-                <div class="mv-row"><span class="mv-key">Type</span><span class="mv-val" id="mv-type">---</span></div>
-                <div class="mv-row"><span class="mv-key">Station</span><span class="mv-val" id="mv-station" style="font-size:10px;max-width:130px;text-align:right;">---</span></div>
-                <div class="mv-row"><span class="mv-key">GPS</span><span class="mv-val" id="mv-gps" style="font-size:9px;font-family:monospace;">No Fix</span></div>
-                <div class="mv-status-bar">
-                    <div class="mv-status-btn" id="mvb-standby">Standby</div>
-                    <div class="mv-status-btn" id="mvb-responding">Respond</div>
-                    <div class="mv-status-btn" id="mvb-arrived">Arrived</div>
+    <!-- UNITS TAB (mobile) -->
+    <div class="tab-view" id="tab-units">
+        <div class="panel-scroll">
+            <!-- My Vehicle -->
+            <div id="mv-section-mobile" style="display:none;">
+                <div class="section-hdr">&#9632; My Vehicle <span id="mv-unit-badge-m" class="section-count">---</span></div>
+                <div class="my-vehicle-card" id="mv-card-mobile">
+                    <div class="mv-title">&#x25A0; Unit Status</div>
+                    <div class="mv-grid">
+                        <div class="mv-field"><div class="mv-field-label">Unit ID</div><div class="mv-field-value" id="mv-id-m">---</div></div>
+                        <div class="mv-field"><div class="mv-field-label">Type</div><div class="mv-field-value" id="mv-type-m">---</div></div>
+                        <div class="mv-field full"><div class="mv-field-label">Station</div><div class="mv-field-value" id="mv-station-m" style="font-size:11px;">---</div></div>
+                        <div class="mv-field full"><div class="mv-field-label">GPS Coordinates</div><div class="mv-field-value" id="mv-gps-m" style="font-size:10px;font-family:monospace;">No Fix</div></div>
+                    </div>
+                    <div class="mv-status-bar">
+                        <div class="mv-status-btn" id="mvb-standby-m">Standby</div>
+                        <div class="mv-status-btn" id="mvb-responding-m">Respond</div>
+                        <div class="mv-status-btn" id="mvb-arrived-m">Arrived</div>
+                    </div>
                 </div>
             </div>
+            <!-- All Units -->
+            <div class="section-hdr">
+                <span><span class="pulse-dot" style="margin-right:5px;"></span>Live Units</span>
+                <span class="section-count" id="unit-count-badge-m">0</span>
+            </div>
+            <div id="unit-list-mobile"></div>
         </div>
+    </div>
 
-        <!-- LIVE UNITS -->
-        <div class="panel-section" style="height:220px;">
-            <div class="panel-hdr">
-                <div class="panel-hdr-title">
-                    <span class="pulse-dot"></span> Live Units
-                </div>
-                <div class="panel-hdr-count" id="unit-count-badge">0</div>
+    <!-- INCIDENTS TAB (mobile) -->
+    <div class="tab-view" id="tab-incidents">
+        <div class="panel-scroll">
+            <div class="section-hdr">
+                <span><span class="pulse-dot amber" style="margin-right:5px;"></span>Active Incidents</span>
+                <span class="section-count" id="incident-count-badge-m">0</span>
             </div>
-            <div class="panel-body" id="unit-list"></div>
-        </div>
-
-        <!-- ACTIVE INCIDENTS -->
-        <div class="panel-section" style="height:200px;">
-            <div class="panel-hdr">
-                <div class="panel-hdr-title">
-                    <span class="pulse-dot amber"></span> Active Incidents
-                </div>
-                <div class="panel-hdr-count" id="incident-count-badge">0</div>
-            </div>
-            <div class="panel-body" id="incident-list">
+            <div id="incident-list-mobile">
                 <div class="empty-state"><div class="empty-state-icon">✅</div>No active incidents</div>
             </div>
         </div>
+    </div>
 
-        <!-- FIRE STATIONS -->
-        <div class="panel-section grow">
-            <div class="panel-hdr">
-                <div class="panel-hdr-title">🏥 Fire Stations</div>
-                <div class="panel-hdr-count">32</div>
+    <!-- STATIONS TAB (mobile) -->
+    <div class="tab-view" id="tab-stations">
+        <div class="panel-scroll">
+            <div class="section-hdr">&#x1F3E5; Fire Stations <span class="section-count">20</span></div>
+            <div id="station-list-mobile"></div>
+        </div>
+    </div>
+
+    <!-- ── DESKTOP RIGHT PANEL ───────────────────── -->
+    <div class="desktop-right">
+        <!-- My Vehicle (desktop) -->
+        <div class="desktop-section" id="mv-section-desktop" style="display:none;">
+            <div class="desktop-panel-hdr">
+                <div class="desktop-panel-hdr-title">&#128663; My Vehicle</div>
+                <div class="desktop-count" id="mv-unit-badge-d">---</div>
             </div>
-            <div class="panel-body" id="station-list"></div>
+            <div class="my-vehicle-card" id="mv-card-desktop">
+                <div class="mv-title">&#9632; UNIT STATUS</div>
+                <div class="mv-row" style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;">
+                    <span style="color:var(--muted);">Unit ID</span><span style="color:#fff;font-weight:700;" id="mv-id-d">---</span>
+                </div>
+                <div class="mv-row" style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;">
+                    <span style="color:var(--muted);">Type</span><span style="color:#fff;font-weight:700;" id="mv-type-d">---</span>
+                </div>
+                <div class="mv-row" style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;">
+                    <span style="color:var(--muted);">Station</span><span style="color:#fff;font-weight:600;font-size:10px;text-align:right;max-width:130px;" id="mv-station-d">---</span>
+                </div>
+                <div class="mv-row" style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;">
+                    <span style="color:var(--muted);">GPS</span><span style="color:#fff;font-size:9px;font-family:monospace;" id="mv-gps-d">No Fix</span>
+                </div>
+                <div class="mv-status-bar" style="margin-top:10px;">
+                    <div class="mv-status-btn" id="mvb-standby-d">Standby</div>
+                    <div class="mv-status-btn" id="mvb-responding-d">Respond</div>
+                    <div class="mv-status-btn" id="mvb-arrived-d">Arrived</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Units (desktop) -->
+        <div class="desktop-section" style="height:200px;">
+            <div class="desktop-panel-hdr">
+                <div class="desktop-panel-hdr-title"><span class="pulse-dot" style="margin-right:4px;"></span>Live Units</div>
+                <div class="desktop-count" id="unit-count-badge-d">0</div>
+            </div>
+            <div class="desktop-scroll"><div id="unit-list-desktop"></div></div>
+        </div>
+
+        <!-- Incidents (desktop) -->
+        <div class="desktop-section" style="height:190px;">
+            <div class="desktop-panel-hdr">
+                <div class="desktop-panel-hdr-title"><span class="pulse-dot amber" style="margin-right:4px;"></span>Incidents</div>
+                <div class="desktop-count" id="incident-count-badge-d">0</div>
+            </div>
+            <div class="desktop-scroll">
+                <div id="incident-list-desktop">
+                    <div class="empty-state"><div class="empty-state-icon">✅</div>No active incidents</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stations (desktop) -->
+        <div class="desktop-section grow">
+            <div class="desktop-panel-hdr">
+                <div class="desktop-panel-hdr-title">&#x1F3E5; Stations</div>
+                <div class="desktop-count">20</div>
+            </div>
+            <div class="desktop-scroll"><div id="station-list-desktop"></div></div>
         </div>
     </div>
 </div>
 
-<!-- TOAST CONTAINER -->
+<!-- ── BOTTOM NAV (mobile only) ──────────────────── -->
+<nav class="bottom-nav">
+    <button class="nav-tab active" id="nav-map" onclick="switchTab('map')">
+        <div class="nav-tab-icon">🗺️</div>
+        <div class="nav-tab-label">Map</div>
+    </button>
+    <button class="nav-tab" id="nav-units" onclick="switchTab('units')">
+        <div class="nav-tab-icon">🚒</div>
+        <div class="nav-tab-label">Units</div>
+    </button>
+    <button class="nav-tab" id="nav-incidents" onclick="switchTab('incidents')">
+        <div class="nav-tab-icon">🔥</div>
+        <div class="nav-tab-label">Incidents</div>
+        <div class="nav-badge" id="inc-badge">0</div>
+    </button>
+    <button class="nav-tab" id="nav-stations" onclick="switchTab('stations')">
+        <div class="nav-tab-icon">🏥</div>
+        <div class="nav-tab-label">Stations</div>
+    </button>
+</nav>
+
+<!-- TOAST -->
 <div class="toast-container" id="toast-container"></div>
 
 <script>
@@ -491,364 +656,399 @@ onAuthStateChanged(auth, async user => {
 // ══════════════════════════════════════════════════════
 function updateClock() {
     const now = new Date();
-    document.getElementById('clock').textContent = now.toLocaleTimeString('en-PH',{hour12:false});
-    document.getElementById('date-lbl').textContent = now.toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).toUpperCase();
+    const el = document.getElementById('clock');
+    if (el) el.textContent = now.toLocaleTimeString('en-PH',{hour12:false});
 }
 updateClock(); setInterval(updateClock, 1000);
 
 // ══════════════════════════════════════════════════════
-// BLYNK CONFIG — same as main dashboard
+// TAB SWITCHING (mobile)
+// ══════════════════════════════════════════════════════
+let currentTab = 'map';
+function switchTab(tab) {
+    if (window.innerWidth >= 768) return; // desktop — no-op
+    document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById('nav-' + tab).classList.add('active');
+    currentTab = tab;
+    if (tab === 'map') setTimeout(() => map.invalidateSize(), 100);
+}
+
+// ══════════════════════════════════════════════════════
+// BLYNK CONFIG
 // ══════════════════════════════════════════════════════
 const BLYNK_BASE = "https://blynk.cloud/external/api";
 const UNITS = [
-    { id: "A-001", token: "HKEGX3vYVEzqoEv5plTw5tU-7ITdnmlJ", type: "ambulance" },
-    { id: "F-001", token: "DQ8eqlsc7wjL4A7M540oteHKRw-HWBYS", type: "firetruck" },
-    { id: "A-003", token: "TOKEN_A003_HERE",                   type: "ambulance" },
+    { id:"A-001", token:"HKEGX3vYVEzqoEv5plTw5tU-7ITdnmlJ", type:"ambulance" },
+    { id:"F-001", token:"DQ8eqlsc7wjL4A7M540oteHKRw-HWBYS", type:"firetruck" },
+    { id:"A-003", token:"TOKEN_A003_HERE",                   type:"ambulance" },
 ];
 const V_STANDBY=4, V_RESPONDING=5, V_ARRIVED=6, V_LOCATION=7;
-
-let unitStates   = {};
-let unitMarkers  = {};
-let prevStates   = {};
+let unitStates = {}, unitMarkers = {}, prevStates = {};
 
 // ══════════════════════════════════════════════════════
 // MAP INIT
 // ══════════════════════════════════════════════════════
-const map = L.map('map', { zoomControl: false }).setView([10.3157, 123.8854], 13);
-L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CartoDB', subdomains: 'abcd', maxZoom: 19
+const map = L.map('map',{zoomControl:false}).setView([10.3157,123.8854],13);
+L.control.zoom({position:'bottomright'}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; OpenStreetMap &copy; CartoDB', subdomains:'abcd', maxZoom:19
 }).addTo(map);
 
-// Map overlay counter (top-right)
+// Map overlay
 const mapOverlay = L.control({position:'topright'});
 mapOverlay.onAdd = function() {
     this._div = L.DomUtil.create('div','map-overlay-counter');
     this.update(); return this._div;
 };
-mapOverlay.update = function(trucks=0, ambs=0, fire=0, med=0) {
+mapOverlay.update = function(trucks=0,ambs=0,fire=0,med=0) {
     this._div.innerHTML = `
         <div class="ov-title">Live Tracking</div>
-        <div class="ov-row"><span class="ov-label">🚒 Firetrucks</span><span class="ov-val" style="color:#ff4d4d;">${trucks}</span></div>
-        <div class="ov-row"><span class="ov-label">🚑 Ambulances</span><span class="ov-val" style="color:#1a8cff;">${ambs}</span></div>
+        <div class="ov-row"><span class="ov-label">🚒 Firetrucks</span><span class="ov-val" style="color:var(--red)">${trucks}</span></div>
+        <div class="ov-row"><span class="ov-label">🚑 Ambulances</span><span class="ov-val" style="color:var(--accent)">${ambs}</span></div>
         <hr class="ov-divider"/>
-        <div class="ov-title">Active Incidents</div>
-        <div class="ov-row"><span class="ov-label">🔥 Fire</span><span class="ov-val" style="color:#ffcc00;">${fire}</span></div>
-        <div class="ov-row"><span class="ov-label">⚕️ Medical</span><span class="ov-val" style="color:#ffcc00;">${med}</span></div>`;
+        <div class="ov-title">Incidents</div>
+        <div class="ov-row"><span class="ov-label">🔥 Fire</span><span class="ov-val" style="color:var(--yellow)">${fire}</span></div>
+        <div class="ov-row"><span class="ov-label">⚕️ Medical</span><span class="ov-val" style="color:var(--yellow)">${med}</span></div>`;
 };
 mapOverlay.addTo(map);
 
-const fireIcon = L.icon({ iconUrl:"fireStation1.png", iconSize:[28,28] });
-const volIcon  = L.icon({ iconUrl:"volunteerStation1.png", iconSize:[28,28] });
+const fireIcon = L.icon({iconUrl:"fireStation1.png",   iconSize:[26,26]});
+const volIcon  = L.icon({iconUrl:"volunteerStation1.png", iconSize:[26,26]});
 
 // ══════════════════════════════════════════════════════
-// FIRE STATIONS DATA
+// FIRE STATIONS
 // ══════════════════════════════════════════════════════
 const STATIONS = [
-    {name:"BFP Regional Office VII",            number:"(032) 517 9027",   lat:10.2979789, lng:123.8922118, type:"bfp"},
-    {name:"Cebu City Fire Station (Pari-an)",   number:"(032) 255 0785",   lat:10.2993222, lng:123.9034484, type:"bfp"},
-    {name:"Labangon Fire Station",              number:"(032) 261 0911",   lat:10.2991806, lng:123.8810782, type:"bfp"},
-    {name:"Guadalupe Fire Sub-Station",         number:"+63 947 523 6144", lat:10.3225746, lng:123.8840113, type:"bfp"},
-    {name:"Lahug Fire Sub-Station",             number:"(032) 256 0541",   lat:10.3243147, lng:123.8985383, type:"bfp"},
-    {name:"Apas Fire Sub-Station",              number:"(032) 416 5103",   lat:10.3371357, lng:123.9048811, type:"bfp"},
-    {name:"Mabolo Fire Sub-Station",            number:"N/A",              lat:10.3122927, lng:123.9159289, type:"bfp"},
-    {name:"Cebu Business Park Sub-Station",     number:"0917 505 1100",    lat:10.3138334, lng:123.9083305, type:"bfp"},
-    {name:"BFP R7 Mandaue City",                number:"(032) 344 4747",   lat:10.3230721, lng:123.9412341, type:"bfp"},
-    {name:"Lapu-Lapu City Fire Station 1",      number:"0999 972 1111",    lat:10.30525,   lng:123.958844,  type:"bfp"},
-    {name:"TINAGO Fire Brigade",                number:"N/A",              lat:10.2971754, lng:123.9088248, type:"volunteer"},
-    {name:"LAHUG Fire Brigade",                 number:"N/A",              lat:10.3244675, lng:123.8985555, type:"volunteer"},
-    {name:"Cebu Filipino-Chinese VFB",          number:"(032) 254 0200",   lat:10.310547,  lng:123.8891627, type:"volunteer"},
-    {name:"ERUF Fire Brigade",                  number:"0918 921 0000",    lat:10.2964812, lng:123.9029182, type:"volunteer"},
-    {name:"Talisay City Fire Station",          number:"(032) 272 8277",   lat:10.2450,    lng:123.8490,    type:"bfp"},
-    {name:"Naga City Fire Station",             number:"(032) 272 6410",   lat:10.2080,    lng:123.7580,    type:"bfp"},
-    {name:"Consolacion Fire Station",           number:"(032) 423 3037",   lat:10.3794,    lng:123.9535,    type:"bfp"},
-    {name:"Liloan Fire Station",                number:"(032) 564 3781",   lat:10.3990,    lng:123.9990,    type:"bfp"},
-    {name:"Danao City Fire Station",            number:"(032) 200 4000",   lat:10.5233,    lng:124.0300,    type:"bfp"},
-    {name:"Bogo City Fire Station",             number:"(032) 434 8575",   lat:11.0506,    lng:124.0048,    type:"bfp"},
+    {name:"BFP Regional Office VII",          number:"(032) 517 9027",   lat:10.2979789,lng:123.8922118,type:"bfp"},
+    {name:"Cebu City Fire Station (Pari-an)", number:"(032) 255 0785",   lat:10.2993222,lng:123.9034484,type:"bfp"},
+    {name:"Labangon Fire Station",            number:"(032) 261 0911",   lat:10.2991806,lng:123.8810782,type:"bfp"},
+    {name:"Guadalupe Fire Sub-Station",       number:"+63 947 523 6144", lat:10.3225746,lng:123.8840113,type:"bfp"},
+    {name:"Lahug Fire Sub-Station",           number:"(032) 256 0541",   lat:10.3243147,lng:123.8985383,type:"bfp"},
+    {name:"Apas Fire Sub-Station",            number:"(032) 416 5103",   lat:10.3371357,lng:123.9048811,type:"bfp"},
+    {name:"Mabolo Fire Sub-Station",          number:"N/A",              lat:10.3122927,lng:123.9159289,type:"bfp"},
+    {name:"Cebu Business Park Sub-Station",   number:"0917 505 1100",    lat:10.3138334,lng:123.9083305,type:"bfp"},
+    {name:"BFP R7 Mandaue City",              number:"(032) 344 4747",   lat:10.3230721,lng:123.9412341,type:"bfp"},
+    {name:"Lapu-Lapu City Fire Station 1",    number:"0999 972 1111",    lat:10.30525,  lng:123.958844, type:"bfp"},
+    {name:"TINAGO Fire Brigade",              number:"N/A",              lat:10.2971754,lng:123.9088248,type:"volunteer"},
+    {name:"LAHUG Fire Brigade",               number:"N/A",              lat:10.3244675,lng:123.8985555,type:"volunteer"},
+    {name:"Cebu Filipino-Chinese VFB",        number:"(032) 254 0200",   lat:10.310547, lng:123.8891627,type:"volunteer"},
+    {name:"ERUF Fire Brigade",                number:"0918 921 0000",    lat:10.2964812,lng:123.9029182,type:"volunteer"},
+    {name:"Talisay City Fire Station",        number:"(032) 272 8277",   lat:10.2450,   lng:123.8490,   type:"bfp"},
+    {name:"Naga City Fire Station",           number:"(032) 272 6410",   lat:10.2080,   lng:123.7580,   type:"bfp"},
+    {name:"Consolacion Fire Station",         number:"(032) 423 3037",   lat:10.3794,   lng:123.9535,   type:"bfp"},
+    {name:"Liloan Fire Station",              number:"(032) 564 3781",   lat:10.3990,   lng:123.9990,   type:"bfp"},
+    {name:"Danao City Fire Station",          number:"(032) 200 4000",   lat:10.5233,   lng:124.0300,   type:"bfp"},
+    {name:"Bogo City Fire Station",           number:"(032) 434 8575",   lat:11.0506,   lng:124.0048,   type:"bfp"},
 ];
 
-const stationListEl = document.getElementById('station-list');
+// Build station lists (mobile + desktop) and add map markers
+const stationListM = document.getElementById('station-list-mobile');
+const stationListD = document.getElementById('station-list-desktop');
 STATIONS.forEach(s => {
-    L.marker([s.lat, s.lng], {icon: s.type==='bfp' ? fireIcon : volIcon})
+    L.marker([s.lat,s.lng],{icon:s.type==='bfp'?fireIcon:volIcon})
      .addTo(map)
      .bindPopup(`<div style="color:#c9d1d9"><b style="color:#fff;">${s.name}</b><br>📞 ${s.number}</div>`);
 
-    const el = document.createElement('div');
-    el.className = 'station-item';
-    el.innerHTML = `
+    const html = `<div class="station-item" onclick="map.flyTo([${s.lat},${s.lng}],16);switchTab('map')">
         <div><span class="stn-type-badge ${s.type==='bfp'?'stn-bfp':'stn-vol'}">${s.type.toUpperCase()}</span></div>
         <div class="stn-name">${s.name}</div>
-        <div class="stn-meta">📞 ${s.number}</div>`;
-    el.onclick = () => map.flyTo([s.lat, s.lng], 16);
-    stationListEl.appendChild(el);
+        <div class="stn-meta">📞 ${s.number}</div>
+    </div>`;
+    stationListM.insertAdjacentHTML('beforeend', html);
+    stationListD.insertAdjacentHTML('beforeend', html.replace(/switchTab\('map'\)/g,"").replace(/onclick="map/g,'onclick="map'));
 });
+document.getElementById('stat-stations').textContent = STATIONS.length;
 
 // ══════════════════════════════════════════════════════
-// INCIDENT TRACKING (READ-ONLY from shared state)
-// — Incidents come from localStorage set by main dashboard
-//   OR via a simple Blynk/Firestore bridge; for now we
-//   sync via BroadcastChannel if opened in same browser.
+// INCIDENT SYNC (BroadcastChannel from main dashboard)
 // ══════════════════════════════════════════════════════
+let incidentData = {}, incCounts = {fire:0, med:0};
 const incidentMarkers = {};
-let   incidentData    = {};
-let   incCounts       = {fire:0, med:0};
 
-// BroadcastChannel — syncs incidents if main dashboard is
-// open in same browser session.
-let bc;
 try {
-    bc = new BroadcastChannel('tulong_incidents');
-    bc.onmessage = (e) => {
-        if (e.data?.type === 'incident_update') syncIncidents(e.data.payload);
-    };
+    const bc = new BroadcastChannel('tulong_incidents');
+    bc.onmessage = e => { if (e.data?.type==='incident_update') syncIncidents(e.data.payload); };
 } catch(_) {}
 
 function syncIncidents(payload) {
     if (!payload) return;
     incidentData = payload;
     incCounts = {fire:0, med:0};
-
-    // Remove stale markers
     for (const id in incidentMarkers) {
         if (!incidentData[id]) { map.removeLayer(incidentMarkers[id]); delete incidentMarkers[id]; }
     }
-
-    // Add / update markers
     for (const id in incidentData) {
         const d = incidentData[id];
         if (!incidentMarkers[id]) {
-            incidentMarkers[id] = L.marker([d.lat, d.lng], { icon: L.divIcon({
-                html: `<div style="font-size:28px;">${d.type==='fire'?'🔥':'⚕️'}</div>`,
-                className: '', iconSize:[34,34], iconAnchor:[17,17]
+            incidentMarkers[id] = L.marker([d.lat,d.lng],{icon:L.divIcon({
+                html:`<div style="font-size:26px;">${d.type==='fire'?'🔥':'⚕️'}</div>`,
+                className:'', iconSize:[32,32], iconAnchor:[16,16]
             })}).addTo(map)
-            .bindPopup(`<div style="color:#c9d1d9;min-width:160px;">
+            .bindPopup(`<div style="color:#c9d1d9;min-width:150px;">
                 <b style="color:#fff;">${d.type.toUpperCase()} INCIDENT</b><br>
                 <small>${d.address||''}</small><br><br>
-                <span style="color:#8b949e;font-size:10px;">Status: ${d.status}</span>
+                <span style="font-size:10px;color:#8b949e;">Status: ${d.status}</span>
             </div>`);
         }
-        if (!d.isResolved) {
-            if (d.type==='fire') incCounts.fire++;
-            else incCounts.med++;
-        }
+        if (!d.isResolved) { if (d.type==='fire') incCounts.fire++; else incCounts.med++; }
     }
-    renderIncidentList();
+    renderIncidentLists();
     updateStats();
 }
 
-function renderIncidentList() {
-    const el = document.getElementById('incident-list');
+function renderIncidentLists() {
     const active = Object.entries(incidentData).filter(([,d])=>!d.isResolved);
-    document.getElementById('incident-count-badge').textContent = active.length;
+    const count  = active.length;
+
+    // Update badges
+    ['m','d'].forEach(sfx => {
+        const el = document.getElementById('incident-count-badge-'+sfx);
+        if (el) el.textContent = count;
+    });
     document.getElementById('stat-fire').textContent = incCounts.fire;
     document.getElementById('stat-med').textContent  = incCounts.med;
-    if (active.length === 0) {
-        el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div>No active incidents</div>';
-        return;
-    }
-    el.innerHTML = active.map(([id, d]) => `
-        <div class="incident-item" onclick="map.flyTo([${d.lat},${d.lng}],16)">
-            <div class="inc-top">
-                <div class="inc-type ${d.type}">${d.type==='fire'?'🔥 FIRE':'⚕️ MEDICAL'}</div>
-                <div class="inc-id">${id}</div>
-            </div>
-            <div class="inc-addr">${d.address||'Location pending...'}</div>
-            <div class="inc-meta">
-                <span class="inc-tag">${d.status}</span>
-                ${d.alarm&&d.alarm!=='N/A'?`<span class="inc-tag">${d.alarm}</span>`:''}
-            </div>
-        </div>`).join('');
+
+    // Mobile nav badge
+    const navBadge = document.getElementById('inc-badge');
+    navBadge.textContent = count;
+    navBadge.classList.toggle('visible', count > 0);
+
+    const html = count === 0
+        ? '<div class="empty-state"><div class="empty-state-icon">✅</div>No active incidents</div>'
+        : active.map(([id,d]) => `
+            <div class="incident-item" onclick="map.flyTo([${d.lat},${d.lng}],16);switchTab('map')">
+                <div class="inc-top">
+                    <div class="inc-type ${d.type}">${d.type==='fire'?'🔥 FIRE':'⚕️ MEDICAL'}</div>
+                    <div class="inc-id">${id}</div>
+                </div>
+                <div class="inc-addr">${d.address||'Location pending...'}</div>
+                <div class="inc-meta">
+                    <span class="inc-tag">${d.status}</span>
+                    ${d.alarm&&d.alarm!=='N/A'?`<span class="inc-tag">${d.alarm}</span>`:''}
+                </div>
+            </div>`).join('');
+
+    const elM = document.getElementById('incident-list-mobile');
+    const elD = document.getElementById('incident-list-desktop');
+    if (elM) elM.innerHTML = html;
+    if (elD) elD.innerHTML = html;
 }
 
 // ══════════════════════════════════════════════════════
-// UNIT FETCHING (Blynk)
+// BLYNK UNIT FETCHING
 // ══════════════════════════════════════════════════════
 async function fetchUnit(unit) {
-    if (!unit.token || unit.token.includes('TOKEN_') || unit.token.length < 20) {
-        unitStates[unit.id] = { online: false, type: unit.type };
-        return false;
+    if (!unit.token||unit.token.includes('TOKEN_')||unit.token.length<20) {
+        unitStates[unit.id]={online:false,type:unit.type}; return false;
     }
     try {
-        const connRes  = await fetch(`${BLYNK_BASE}/isHardwareConnected?token=${unit.token}`);
+        const connRes = await fetch(`${BLYNK_BASE}/isHardwareConnected?token=${unit.token}`);
         if (!connRes.ok) { setOffline(unit); return false; }
         const connText = await connRes.text();
-        if (connText.toLowerCase().includes('invalid') || connText.trim() !== 'true') { setOffline(unit); return false; }
+        if (connText.toLowerCase().includes('invalid')||connText.trim()!=='true') { setOffline(unit); return false; }
 
         const res  = await fetch(`${BLYNK_BASE}/get?token=${unit.token}&v${V_STANDBY}&v${V_RESPONDING}&v${V_ARRIVED}&v${V_LOCATION}`);
         if (!res.ok) { setOffline(unit); return false; }
         const text = await res.text();
         if (text.toLowerCase().includes('invalid')) { setOffline(unit); return false; }
-        let data;
-        try { data = JSON.parse(text); } catch(e) { setOffline(unit); return false; }
+        let data; try { data=JSON.parse(text); } catch(e) { setOffline(unit); return false; }
 
         const standby    = parseFloat(data[`v${V_STANDBY}`])    > 0;
         const responding = parseFloat(data[`v${V_RESPONDING}`]) > 0;
         const arrived    = parseFloat(data[`v${V_ARRIVED}`])    > 0;
         const locRaw     = data[`v${V_LOCATION}`];
-        let lon=null, lat=null;
+        let lon=null,lat=null;
         if (Array.isArray(locRaw)&&locRaw.length>=2) { lon=parseFloat(locRaw[0]); lat=parseFloat(locRaw[1]); }
         else if (typeof locRaw==='string'&&locRaw.includes(',')) { const p=locRaw.split(','); lon=parseFloat(p[0]); lat=parseFloat(p[1]); }
-        if (lat&&lon) {
-            if (lat<4||lat>21||lon<116||lon>127) { [lat,lon]=[lon,lat]; if(lat<4||lat>21||lon<116||lon>127){lat=null;lon=null;} }
-        }
+        if (lat&&lon) { if(lat<4||lat>21||lon<116||lon>127){[lat,lon]=[lon,lat];if(lat<4||lat>21||lon<116||lon>127){lat=null;lon=null;}} }
 
-        // Status change toast notifications
-        const prev = prevStates[unit.id] || {};
-        if (prev.online === false && true) showToast('info', `${unit.id} Back Online`, `${unit.type === 'firetruck' ? '🚒' : '🚑'} Unit is now connected`);
-        if (responding && !prev.responding) showToast('warn', `${unit.id} Responding`, 'Unit is en route to an incident');
-        if (arrived    && !prev.arrived)    showToast('fire', `${unit.id} Arrived`,    'Unit has arrived on scene');
-        prevStates[unit.id] = {standby, responding, arrived, online: true};
-
-        unitStates[unit.id] = {standby, responding, arrived, lat, lon, type: unit.type, online: true};
-        if (lat && lon) updateUnitMarker(unit.id, unitStates[unit.id]);
+        const prev = prevStates[unit.id]||{};
+        if (prev.online===false) showToast('info',`${unit.id} Back Online`,`${unit.type==='firetruck'?'🚒':'🚑'} Unit is now connected`);
+        if (responding&&!prev.responding) showToast('warn',`${unit.id} Responding`,'Unit is en route to an incident');
+        if (arrived&&!prev.arrived)       showToast('fire',`${unit.id} Arrived`,   'Unit has arrived on scene');
+        prevStates[unit.id]={standby,responding,arrived,online:true};
+        unitStates[unit.id]={standby,responding,arrived,lat,lon,type:unit.type,online:true};
+        if (lat&&lon) updateUnitMarker(unit.id,unitStates[unit.id]);
         return true;
     } catch(e) { setOffline(unit); return false; }
 }
 
 function setOffline(unit) {
-    if (unitStates[unit.id]?.online !== false) prevStates[unit.id] = {...(prevStates[unit.id]||{}), online: false};
-    unitStates[unit.id] = { online: false, type: unit.type };
+    unitStates[unit.id]={online:false,type:unit.type};
     if (unitMarkers[unit.id]) { map.removeLayer(unitMarkers[unit.id]); delete unitMarkers[unit.id]; }
 }
 
-function updateUnitMarker(id, s) {
-    const color    = s.responding ? '#f0883e' : s.arrived ? '#ff4d4d' : '#27ae60';
-    const lbl      = s.responding ? 'RESPONDING' : s.arrived ? 'ARRIVED' : 'STANDBY';
-    const img      = s.type === 'firetruck' ? 'firetruck.png' : 'AMBULANCE.png';
-    const pinColor = s.type === 'firetruck' ? '#ff4d4d' : '#1a8cff';
-    const icon = L.divIcon({ className:'', iconSize:[44,70], iconAnchor:[22,70],
+function updateUnitMarker(id,s) {
+    const color    = s.responding?'#f0883e':s.arrived?'#ff4d4d':'#27ae60';
+    const lbl      = s.responding?'RESPONDING':s.arrived?'ARRIVED':'STANDBY';
+    const img      = s.type==='firetruck'?'firetruck.png':'AMBULANCE.png';
+    const pinColor = s.type==='firetruck'?'#ff4d4d':'#1a8cff';
+    const icon = L.divIcon({className:'',iconSize:[44,70],iconAnchor:[22,70],
         html:`<div style="text-align:center;width:44px;">
-            <svg width="44" height="56" viewBox="0 0 44 56" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.5))">
+            <svg width="44" height="56" viewBox="0 0 44 56" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))">
                 <path d="M22 0 C10 0 0 10 0 22 C0 36 22 56 22 56 C22 56 44 36 44 22 C44 10 34 0 22 0 Z" fill="${pinColor}"/>
                 <circle cx="22" cy="21" r="16" fill="white"/>
                 <image href="${img}" x="6" y="5" width="32" height="32"/>
             </svg>
             <div style="background:${color};color:#fff;font-size:8px;font-weight:bold;padding:1px 5px;border-radius:3px;white-space:nowrap;margin-top:2px;display:inline-block;">${id}</div>
         </div>`});
-    const popup = `<div style="color:#c9d1d9;min-width:150px;">
+    const popup=`<div style="color:#c9d1d9;min-width:140px;">
         <b style="color:#fff;">${id}</b><br>
         <span style="background:${color};padding:2px 6px;border-radius:3px;font-size:11px;color:#fff;">${lbl}</span><br><br>
-        <span style="font-size:10px;color:#8b949e;">
-            ${s.type==='firetruck'?'🚒 Firetruck':'🚑 Ambulance'}<br>
-            Lat: ${s.lat?s.lat.toFixed(6):'N/A'} &nbsp; Lon: ${s.lon?s.lon.toFixed(6):'N/A'}
-        </span></div>`;
+        <span style="font-size:10px;color:#8b949e;">${s.type==='firetruck'?'🚒 Firetruck':'🚑 Ambulance'}<br>
+        Lat: ${s.lat?s.lat.toFixed(6):'N/A'} &nbsp; Lon: ${s.lon?s.lon.toFixed(6):'N/A'}</span></div>`;
     if (unitMarkers[id]) { unitMarkers[id].setLatLng([s.lat,s.lon]); unitMarkers[id].setIcon(icon); unitMarkers[id].setPopupContent(popup); }
-    else unitMarkers[id] = L.marker([s.lat,s.lon],{icon}).addTo(map).bindPopup(popup);
+    else unitMarkers[id]=L.marker([s.lat,s.lon],{icon}).addTo(map).bindPopup(popup);
 }
 
-function renderUnitList() {
-    const el = document.getElementById('unit-list');
-    let online = 0;
-    el.innerHTML = UNITS.map(u => {
-        const s = unitStates[u.id];
-        const status = !s||!s.online ? 'offline' : s.responding?'responding':s.arrived?'arrived':s.standby?'standby':'offline';
-        const coords = s&&s.lat&&s.lon ? `${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}` : 'No GPS fix';
-        const fly    = s&&s.lat&&s.lon ? `onclick="map.flyTo([${s.lat},${s.lon}],16)"` : '';
-        if (s?.online) online++;
-        const badgeClass = `badge-${status}`;
-        return `<div class="unit-card ${status}" ${fly}>
+function renderUnitLists() {
+    let online=0;
+    const html = UNITS.map(u => {
+        const s=unitStates[u.id];
+        const status=!s||!s.online?'offline':s.responding?'responding':s.arrived?'arrived':s.standby?'standby':'offline';
+        const coords=s&&s.lat&&s.lon?`${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}`:'No GPS fix';
+        const fly=s&&s.lat&&s.lon?`map.flyTo([${s.lat},${s.lon}],16);switchTab('map')`:'';
+        if(s?.online) online++;
+        return `<div class="unit-card ${status}" onclick="${fly}">
             <div class="uc-top">
                 <span class="uc-id">${u.id}</span>
-                <span class="uc-badge ${badgeClass}">${status.toUpperCase()}</span>
+                <span class="uc-badge badge-${status}">${status.toUpperCase()}</span>
             </div>
             <div class="uc-type">${u.type==='firetruck'?'🚒 Firetruck':'🚑 Ambulance'}</div>
             <div class="uc-gps">${coords}</div>
         </div>`;
     }).join('');
-    document.getElementById('unit-count-badge').textContent = online;
+
+    ['mobile','desktop'].forEach(sfx => {
+        const el=document.getElementById('unit-list-'+sfx);
+        if(el) el.innerHTML=html;
+    });
+    ['m','d'].forEach(sfx => {
+        const el=document.getElementById('unit-count-badge-'+sfx);
+        if(el) el.textContent=online;
+    });
+    document.getElementById('stat-online').textContent=online;
     return online;
 }
 
 function updateStats() {
-    const st = Object.values(unitStates);
-    const trucks = st.filter(s=>s.online&&s.type==='firetruck').length;
-    const ambs   = st.filter(s=>s.online&&s.type==='ambulance').length;
-    document.getElementById('stat-trucks').textContent = trucks;
-    document.getElementById('stat-ambs').textContent   = ambs;
-    mapOverlay.update(trucks, ambs, incCounts.fire, incCounts.med);
-    // Update my vehicle status display
+    const st=Object.values(unitStates);
+    const trucks=st.filter(s=>s.online&&s.type==='firetruck').length;
+    const ambs  =st.filter(s=>s.online&&s.type==='ambulance').length;
+    document.getElementById('stat-trucks').textContent=trucks;
+    document.getElementById('stat-ambs').textContent=ambs;
+    mapOverlay.update(trucks,ambs,incCounts.fire,incCounts.med);
     updateMyVehiclePanel();
 }
 
 // ══════════════════════════════════════════════════════
-// MY VEHICLE PANEL
+// MY VEHICLE PANEL — updates both mobile & desktop
 // ══════════════════════════════════════════════════════
 function updateMyVehiclePanel() {
-    const mv = window.myVehicle;
+    const mv=window.myVehicle;
     if (!mv) return;
-    const sec = document.getElementById('my-vehicle-section');
-    sec.style.display = '';
-    document.getElementById('mv-id').textContent      = mv.unitId || '---';
-    document.getElementById('mv-type').textContent    = mv.type === 'firetruck' ? '🚒 Firetruck' : '🚑 Ambulance';
-    document.getElementById('mv-station').textContent = mv.station || '---';
-    document.getElementById('my-unit-badge').textContent = mv.unitId || '---';
 
-    const s = unitStates[mv.unitId];
-    if (s?.lat && s?.lon) document.getElementById('mv-gps').textContent = `${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}`;
+    // Show both sections
+    const secM=document.getElementById('mv-section-mobile');
+    const secD=document.getElementById('mv-section-desktop');
+    if(secM) secM.style.display='';
+    if(secD) secD.style.display='';
 
+    const unitId  = mv.unitId||'---';
+    const typeStr = mv.type==='firetruck'?'🚒 Firetruck':'🚑 Ambulance';
+    const station = mv.station||'---';
+    const s       = unitStates[mv.unitId];
+    const gps     = s?.lat&&s?.lon?`${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}`:'No Fix';
+
+    // Mobile fields
+    const mvIds=['mv-unit-badge-m','mv-id-m','mv-type-m','mv-station-m','mv-gps-m'];
+    const mvVals=[unitId,unitId,typeStr,station,gps];
+    mvIds.forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.textContent=mvVals[i]; });
+
+    // Desktop fields
+    const dvIds=['mv-unit-badge-d','mv-id-d','mv-type-d','mv-station-d','mv-gps-d'];
+    dvIds.forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.textContent=mvVals[i]; });
+
+    // Status buttons — both mobile and desktop
     ['standby','responding','arrived'].forEach(k => {
-        const btn = document.getElementById(`mvb-${k}`);
-        btn.className = 'mv-status-btn';
-        if (s?.online && s?.[k]) btn.classList.add(`active-${k}`);
+        ['m','d'].forEach(sfx => {
+            const btn=document.getElementById(`mvb-${k}-${sfx}`);
+            if(!btn) return;
+            btn.className='mv-status-btn';
+            if(s?.online&&s?.[k]) btn.classList.add(`active-${k}`);
+        });
     });
 }
 
 // ══════════════════════════════════════════════════════
-// POLL ALL UNITS
+// POLL
 // ══════════════════════════════════════════════════════
 async function pollAll() {
-    let anyOnline = false;
-    for (const u of UNITS) { if (await fetchUnit(u)) anyOnline = true; }
-    renderUnitList();
+    let anyOnline=false;
+    for (const u of UNITS) { if(await fetchUnit(u)) anyOnline=true; }
+    renderUnitLists();
     updateStats();
-    const dot   = document.getElementById('b-dot');
-    const label = document.getElementById('b-label');
-    dot.className   = 'b-dot ' + (anyOnline ? 'on' : 'off');
-    label.textContent = 'Blynk sync: ' + new Date().toLocaleTimeString('en-PH',{hour12:false});
+    const dot=document.getElementById('b-dot');
+    const lbl=document.getElementById('b-label');
+    dot.className='b-dot '+(anyOnline?'on':'off');
+    lbl.textContent='Blynk sync: '+new Date().toLocaleTimeString('en-PH',{hour12:false});
 }
 
 // ══════════════════════════════════════════════════════
-// TOAST NOTIFICATION
+// TOAST
 // ══════════════════════════════════════════════════════
-function showToast(type, title, body) {
-    const tc = document.getElementById('toast-container');
-    const t  = document.createElement('div');
-    t.className = `toast ${type}`;
-    t.innerHTML = `<div class="toast-title">${title}</div><div class="toast-body">${body}</div>`;
+function showToast(type,title,body) {
+    const tc=document.getElementById('toast-container');
+    const t=document.createElement('div');
+    t.className=`toast ${type}`;
+    t.innerHTML=`<div class="toast-title">${title}</div><div class="toast-body">${body}</div>`;
     tc.appendChild(t);
-    setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(120%)'; t.style.transition='all 0.4s ease'; setTimeout(()=>t.remove(),400); }, 4000);
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(110%)'; t.style.transition='all .4s ease'; setTimeout(()=>t.remove(),400); },4000);
 }
 
 // ══════════════════════════════════════════════════════
 // USER INIT
 // ══════════════════════════════════════════════════════
-window.addEventListener('userReady', () => {
-    const u = window.currentUser || {};
-    const initials = (u.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    document.getElementById('user-avatar').textContent = initials;
-    document.getElementById('user-name').textContent   = u.name || u.email || 'Operator';
-    document.getElementById('user-unit').textContent   = `Unit: ${u.unitId || '---'} | ${(u.vehicleType||'').replace('firetruck','🚒 Firetruck').replace('ambulance','🚑 Ambulance') || 'Operator'}`;
+window.addEventListener('userReady',()=>{
+    const u=window.currentUser||{};
+    const initials=(u.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('user-avatar').textContent=initials;
+    document.getElementById('user-name').textContent=u.name||u.email||'Operator';
+    document.getElementById('user-unit').textContent=`Unit: ${u.unitId||'---'}`;
     updateMyVehiclePanel();
 });
 
 // ══════════════════════════════════════════════════════
 // LOGOUT
 // ══════════════════════════════════════════════════════
-window.confirmLogout = function() {
-    if (confirm('Confirm logout from T.U.L.O.N.G. Operator Dashboard?')) {
-        window._fbSignOut && window._fbSignOut()
-            .then(() => window.location.href = 'login.html')
-            .catch(e => console.error(e));
+window.confirmLogout=function(){
+    if(confirm('Confirm logout from T.U.L.O.N.G. Operator Dashboard?')){
+        window._fbSignOut&&window._fbSignOut()
+            .then(()=>window.location.href='login.html')
+            .catch(e=>console.error(e));
     }
 };
 
 // ══════════════════════════════════════════════════════
+// RESIZE HANDLER — fix map when switching orientations
+// ══════════════════════════════════════════════════════
+window.addEventListener('resize',()=>{
+    if(window.innerWidth>=768) {
+        // Desktop: ensure map tab is visible-ish
+        document.querySelectorAll('.tab-view').forEach(v=>v.classList.remove('active'));
+        document.getElementById('tab-map').classList.add('active');
+    }
+    setTimeout(()=>map.invalidateSize(),200);
+});
+
+// ══════════════════════════════════════════════════════
 // START
 // ══════════════════════════════════════════════════════
-setTimeout(() => map.invalidateSize(), 500);
+setTimeout(()=>map.invalidateSize(),500);
 pollAll();
-setInterval(pollAll, 5000);
+setInterval(pollAll,5000);
 </script>
 </body>
 </html>
