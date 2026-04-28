@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>T.U.L.O.N.G. Dispatch Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap"/>
+<style>
+body {
+    background-color: #022649; color: white; margin: 0; padding: 0;
+    font-family: 'Open Sans', sans-serif; display: flex; flex-direction: column;
+    height: 100vh; overflow: hidden;
+}
+.header-container {
+    display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+    background: rgba(0,0,0,0.3); border-bottom: 1px solid #043a6d;
+    height: 70px; box-sizing: border-box;
+}
+.brand-badge {
+    background: linear-gradient(45deg, #ff0000, #8b0000);
+    color: white; padding: 5px 12px; border-radius: 5px;
+    font-weight: bold; letter-spacing: 2px;
+}
+.main-wrapper { display: flex; flex-grow: 1; height: calc(100vh - 70px); }
+.sidebar {
+    width: 220px; background: #011a33; padding: 15px;
+    display: flex; flex-direction: column; gap: 10px;
+    border-right: 1px solid #043a6d; overflow-y: auto;
+}
+.stat-box { background: #0c0c0c; border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center; }
+.stat-number { font-size: 28px; font-weight: bold; display: block; color: #ff4d4d; }
+.stat-label  { font-size: 11px; color: #888; text-transform: uppercase; }
+.report-btn {
+    background: #ff4d4d; color: white; border: none;
+    padding: 12px; border-radius: 5px; font-weight: bold;
+    cursor: pointer; margin-bottom: 5px; text-transform: uppercase; width: 100%;
+}
+.report-btn:hover { background: #ff1a1a; }
+.report-active { background: #ffcc00; color: black; outline: 3px solid white; }
+.excel-btn {
+    background: #217346; color: white; border: none;
+    padding: 10px; border-radius: 5px; font-weight: bold;
+    cursor: pointer; width: 100%; margin-top: 5px; font-size: 11px; text-transform: uppercase;
+}
+.wipe-btn {
+    background: #d35400; color: white; border: none;
+    padding: 10px; border-radius: 5px; font-weight: bold;
+    cursor: pointer; width: 100%; margin-top: 5px; font-size: 11px; text-transform: uppercase;
+}
+.wipe-btn:hover { background: #e67e22; }
+.logout-btn {
+    width: 100%; padding: 10px; background: rgba(255,0,0,0.1);
+    color: #ff4d4d; border: 1px solid #ff4d4d; border-radius: 4px;
+    font-weight: bold; text-transform: uppercase; font-size: 11px;
+    cursor: pointer; letter-spacing: 1px; transition: all 0.3s ease; margin-top: 5px;
+}
+.logout-btn:hover { background: #ff4d4d; color: white; box-shadow: 0 0 15px rgba(255,77,77,0.3); }
+.leaflet-control-geocoder { border-radius: 5px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+.leaflet-control-geocoder-form input { color: black !important; }
+.map-counter-overlay {
+    background: rgba(2,38,73,0.9); padding: 12px;
+    border: 2px solid #ff4d4d; border-radius: 8px; color: white;
+    min-width: 160px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+.map-counter-item { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+.count-val-red    { color: #ff4d4d; font-size: 18px; }
+.count-val-blue   { color: #4da3ff; font-size: 18px; }
+.count-val-yellow { color: #ffcc00; font-size: 18px; }
+.station-list { margin-top: 10px; font-size: 12px; }
+.station-item { padding: 8px; border-bottom: 1px solid #043a6d; cursor: pointer; }
+.station-item:hover { background: #043a6d; }
+.status-select { width: 100%; padding: 5px; margin-top: 5px; background: #fff; color: #000; border: 1px solid #ccc; font-size: 12px; }
+/* Unit cards */
+.section-lbl {
+    font-size: 10px; letter-spacing: 2px; color: #8b949e;
+    text-transform: uppercase; padding: 6px 0 3px;
+    border-top: 1px solid #043a6d; margin-top: 2px;
+}
+.unit-card {
+    background: #0a1a2d; border: 1px solid #1e3a5f; border-left: 3px solid #1e3a5f;
+    border-radius: 4px; padding: 7px 9px; margin-bottom: 4px;
+    cursor: pointer; transition: border-color 0.15s;
+}
+.unit-card:hover { border-color: #4a8acf; }
+.unit-card.s-responding { border-left-color: #f0883e; }
+.unit-card.s-arrived    { border-left-color: #ff4d4d; }
+.unit-card.s-standby    { border-left-color: #27ae60; }
+.unit-card.s-offline    { border-left-color: #444; opacity: 0.6; }
+.uc-row  { display: flex; justify-content: space-between; align-items: center; }
+.uc-id   { font-size: 12px; font-weight: bold; }
+.uc-badge{ font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; }
+.b-responding { background: #3d2008; color: #f0883e; }
+.b-arrived    { background: #2d0f0f; color: #ff4d4d; }
+.b-standby    { background: #0f2d1a; color: #27ae60; }
+.b-offline    { background: #1a1a1a; color: #666; }
+.uc-sub  { font-size: 9px; color: #8b949e; margin-top: 3px; }
+/* Blynk status */
+.blynk-bar {
+    position: absolute; bottom: 8px; left: 228px;
+    background: rgba(2,38,73,0.88); border: 1px solid #043a6d;
+    border-radius: 4px; padding: 4px 10px; font-size: 10px; color: #8b949e;
+    z-index: 500; display: flex; align-items: center; gap: 6px;
+}
+.blynk-dot { width: 7px; height: 7px; border-radius: 50%; background: #444; }
+.blynk-dot.online  { background: #27ae60; box-shadow: 0 0 5px #27ae60; }
+.blynk-dot.offline { background: #ff4d4d; }
+#map { flex-grow: 1; height: 100%; z-index: 1; }
+/* Terminal */
+.terminal-panel {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #0a0f1a; border-top: 2px solid #1a8cff;
+    z-index: 600; display: flex; flex-direction: column;
+    transition: height 0.25s ease;
+    height: 38px; overflow: hidden;
+}
+.terminal-panel.open { height: 220px; }
+.terminal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 12px; height: 38px; min-height: 38px;
+    background: #0d1b2e; cursor: pointer; user-select: none;
+    border-bottom: 1px solid #1a3a5c;
+}
+.terminal-header-left { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: bold; letter-spacing: 1px; color: #1a8cff; }
+.terminal-header-right { font-size: 10px; color: #8b949e; }
+.terminal-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a8cff; box-shadow: 0 0 6px #1a8cff; }
+.terminal-log {
+    flex: 1; overflow-y: auto; padding: 6px 10px;
+    font-family: 'Courier New', monospace; font-size: 11px;
+    line-height: 1.6; color: #c9d1d9;
+}
+.terminal-log::-webkit-scrollbar { width: 4px; }
+.terminal-log::-webkit-scrollbar-track { background: #0a0f1a; }
+.terminal-log::-webkit-scrollbar-thumb { background: #1a3a5c; border-radius: 2px; }
+.t-sys   { color: #8b949e; }
+.t-send  { color: #1a8cff; }
+.t-ok    { color: #27ae60; }
+.t-err   { color: #ff4d4d; }
+.t-recv  { color: #ffcc00; }
+.terminal-input-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-top: 1px solid #1a3a5c; background: #0d1b2e;
+}
+.t-target-select {
+    background: #0a1525; color: #1a8cff; border: 1px solid #1a3a5c;
+    border-radius: 3px; padding: 4px 6px; font-size: 11px; font-family: 'Courier New', monospace;
+    outline: none; cursor: pointer;
+}
+.t-input {
+    flex: 1; background: #0a1525; color: #fff; border: 1px solid #1a3a5c;
+    border-radius: 3px; padding: 4px 8px; font-size: 11px; font-family: 'Courier New', monospace;
+    outline: none;
+}
+.t-input:focus { border-color: #1a8cff; }
+.t-send-btn {
+    background: #1a3a6c; color: #1a8cff; border: 1px solid #1a8cff;
+    border-radius: 3px; padding: 4px 12px; font-size: 11px; font-weight: bold;
+    cursor: pointer; letter-spacing: 1px; transition: background 0.15s;
+}
+.t-send-btn:hover { background: #1a8cff; color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- FIREBASE — login/auth only, no database -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+const app  = initializeApp({
+    apiKey: "AIzaSyDtYoKpqYE8MDc1dbZANQWwLxpp-heTBr8",
+    authDomain: "tulongtech-7de22.firebaseapp.com",
+    projectId: "tulongtech-7de22",
+    storageBucket: "tulongtech-7de22.firebasestorage.app",
+    messagingSenderId: "924023247315",
+    appId: "1:924023247315:web:45f4d22dc0e6c8436f1f26"
+});
+const auth = getAuth(app);
+window.firebaseSignOut = () => signOut(auth);
+onAuthStateChanged(auth, user => { if (!user) window.location.href = 'login.html'; });
+</script>
+
+<!-- HEADER -->
+<div class="header-container">
+    <img src="tulonglogo.png" style="height:45px;" onerror="this.style.display='none'"/>
+    <div class="brand-badge">T.U.L.O.N.G.</div>
+    <h2 style="flex:1; font-size:18px; margin:0; letter-spacing:1px;">Tactical Unit Locator &amp; Network Grid</h2>
+    <div style="text-align:right;">
+        <div style="font-size:22px; font-weight:bold; letter-spacing:3px;">TULONG</div>
+        <div style="font-size:9px; color:#8b949e; max-width:200px; line-height:1.3;">Where Technology Meets Public Safety for Real Time Response and Real Life Impact.</div>
+    </div>
+</div>
+
+<div class="main-wrapper">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <button class="report-btn" id="report-toggle">&#9888;&#65039; Report Emergency</button>
+
+        <div class="stat-box">
+            <span class="stat-number" id="active-vehicles">0</span>
+            <span class="stat-label">Total Units (Live)</span>
+        </div>
+        <div class="stat-box" style="border-color:#ffcc00;">
+            <span class="stat-number" style="color:#ffcc00;" id="total-incidents">0</span>
+            <span class="stat-label">Active Incidents</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-number" style="color:#4da3ff;" id="station-count">0</span>
+            <span class="stat-label">Nearby Stations</span>
+        </div>
+
+        <div class="section-lbl">&#9632; Live Units (ESP32)</div>
+        <div id="unit-list"></div>
+
+        <button class="excel-btn" onclick="exportToExcel()">&#128203; Export EOD Report</button>
+        <button class="wipe-btn"  onclick="wipeMapAndExport()">&#128247; Wipe Map &amp; Export</button>
+         <button class="register-btn" onclick="openRegisterModal()">&#43; Register Emergency Vehicle</button>
+        <button class="logout-btn" id="logout-trigger">&#x2715; Terminate Session</button>
+
+        <div class="section-lbl">Fire Stations</div>
+        <div class="station-list" id="station-container"></div>
+    </div>
+
+    <!-- MAP -->
+    <div style="position:relative; flex:1; height:100%;">
+        <div id="map" style="width:100%; height:100%;"></div>
+        <div class="blynk-bar" id="blynk-bar-el">
+            <div class="blynk-dot" id="blynk-dot"></div>
+            <span id="blynk-label">Connecting to Blynk...</span>
+        </div>
+
+        <!-- TERMINAL PANEL -->
+        <div class="terminal-panel" id="terminal-panel">
+            <div class="terminal-header" onclick="toggleTerminal()">
+                <div class="terminal-header-left">
+                    <div class="terminal-dot"></div>
+                    &#9654; ESP32 COMMAND TERMINAL &mdash; V3
+                </div>
+                <div class="terminal-header-right" id="term-toggle-lbl">&#9650; EXPAND</div>
+            </div>
+            <div class="terminal-log" id="terminal-log"></div>
+            <div class="terminal-input-row">
+                <select class="t-target-select" id="t-target">
+                    <option value="ALL">ALL UNITS</option>
+                </select>
+                <input class="t-input" id="t-input" type="text" placeholder="Type command and press Enter or SEND..." maxlength="120"/>
+                <button class="t-send-btn" onclick="terminalSend()">SEND</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// BLYNK CONFIG
+// ============================================================
+const BLYNK_BASE = "https://blynk.cloud/external/api";
+const UNITS = [
+    { id: "A-001", token: "HKEGX3vYVEzqoEv5plTw5tU-7ITdnmlJ", type: "ambulance" },
+    { id: "F-001", token: "DQ8eqlsc7wjL4A7M540oteHKRw-HWBYS", type: "firetruck" },
+    { id: "A-003", token: "TOKEN_A003_HERE",                   type: "ambulance" },
+];
+const V_STANDBY=4, V_RESPONDING=5, V_ARRIVED=6, V_LOCATION=7;
+
+// ============================================================
+// MAP INIT — Light tile (no dark mode)
+// ============================================================
+const map = L.map('map').setView([10.3157, 123.8854], 13);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CartoDB', subdomains: 'abcd', maxZoom: 19
+}).addTo(map);
+
+const cebuBounds = L.latLngBounds([9.390,123.230],[11.350,124.150]);
+L.Control.geocoder({
+    defaultMarkGeocode: false, placeholder: "Search Cebu/Mactan streets...",
+    errorMessage: "Location not found in service area.",
+    geocoder: L.Control.Geocoder.nominatim({ geocodingQueryParams: { viewbox:'123.230,9.390,124.150,11.350', bounded:1 } })
+}).on('markgeocode', function(e) {
+    const c = e.geocode.center;
+    if (cebuBounds.contains(c)) {
+        map.flyTo(c, 18);
+        const s = L.circle(c,{color:'#4da3ff',fillColor:'#4da3ff',fillOpacity:0.2,radius:50}).addTo(map);
+        setTimeout(() => map.removeLayer(s), 5000);
+    } else alert("Search result is outside the T.U.L.O.N.G. coverage area.");
+}).addTo(map);
+
+const fireIcon      = L.icon({ iconUrl:"fireStation1.png",      iconSize:[30,30] });
+const volunteerIcon = L.icon({ iconUrl:"volunteerStation1.png",  iconSize:[30,30] });
+
+// ============================================================
+// INCIDENT SYSTEM
+// ============================================================
+let isReporting=false, incidentCounts={fire:0,med:0};
+let activeIncidentMarkers={}, dailyReportLog=[], incidentCounter=1;
+let lastResetDate=new Date().toDateString();
+
+const infoCounter = L.control({position:'topright'});
+infoCounter.onAdd = function() {
+    this._div = L.DomUtil.create('div','map-counter-overlay');
+    this.update(); return this._div;
+};
+infoCounter.update = function() {
+    const trucks = document.getElementById('ov-trucks') ? document.getElementById('ov-trucks').innerText : '0';
+    const ambs   = document.getElementById('ov-ambs')   ? document.getElementById('ov-ambs').innerText   : '0';
+    this._div.innerHTML = `
+        <div style="font-size:10px;color:#888;text-align:center;margin-bottom:8px;">LIVE TRACKING</div>
+        <div class="map-counter-item"><span>🚒 FIRETRUCKS</span><span class="count-val-red" id="ov-trucks">${trucks}</span></div>
+        <div class="map-counter-item"><span>🚑 AMBULANCES</span><span class="count-val-blue" id="ov-ambs">${ambs}</span></div>
+        <hr style="border:0;border-top:1px solid #4da3ff;margin:10px 0;">
+        <div style="font-size:10px;color:#ffcc00;text-align:center;margin-bottom:8px;">ACTIVE INCIDENTS</div>
+        <div class="map-counter-item"><span>🔥 FIRE</span><span class="count-val-yellow">${incidentCounts.fire}</span></div>
+        <div class="map-counter-item"><span>⚕️ MEDICAL</span><span class="count-val-yellow">${incidentCounts.med}</span></div>`;
+};
+infoCounter.addTo(map);
+
+async function getAddress(lat,lng) {
+    try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+        const d = await r.json(); const a = d.address;
+        return `Brgy ${a.quarter||a.suburb||a.village||a.neighbourhood||"Unknown"}, ${a.city||a.town||"Cebu"}`;
+    } catch(e) { return "Address Unavailable"; }
+}
+
+const reportBtn = document.getElementById('report-toggle');
+reportBtn.onclick = () => {
+    isReporting = !isReporting;
+    reportBtn.innerText = isReporting ? "Click map location..." : "⚠️ Report Emergency";
+    reportBtn.classList.toggle('report-active');
+    map.getContainer().style.cursor = isReporting ? 'crosshair' : '';
+};
+
+map.on('click', async function(e) {
+    if (!isReporting) return;
+    const address = await getAddress(e.latlng.lat, e.latlng.lng);
+    L.popup().setLatLng(e.latlng).setContent(`
+        <div style="text-align:center;color:black;">
+            <b>NEW EMERGENCY</b><br><small>${address}</small><br>
+            <button onclick="placeIncident('fire',${e.latlng.lat},${e.latlng.lng},'${address}')" style="background:#ff4d4d;color:white;border:none;padding:8px;margin:5px;cursor:pointer;font-weight:bold;">🔥 FIRE</button>
+            <button onclick="placeIncident('med',${e.latlng.lat},${e.latlng.lng},'${address}')" style="background:#4da3ff;color:white;border:none;padding:8px;margin:5px;cursor:pointer;font-weight:bold;">⚕️ MEDICAL</button>
+        </div>`).openOn(map);
+    isReporting=false; reportBtn.innerText="⚠️ Report Emergency";
+    reportBtn.classList.remove('report-active'); map.getContainer().style.cursor='';
+});
+
+window.placeIncident = function(type,lat,lng,address) {
+    const now = new Date();
+    if (now.toDateString()!==lastResetDate) { incidentCounter=1; lastResetDate=now.toDateString(); }
+    const id = `INC-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(incidentCounter).padStart(5,'0')}`;
+    incidentCounter++;
+    const marker = L.marker([lat,lng],{ icon: L.divIcon({
+        html:`<div id="icon-inner-${id}" style="text-align:center;"><div style="font-size:30px;">${type==='fire'?'🔥':'⚕️'}</div><div id="label-${id}" style="background:rgba(0,0,0,0.8);color:white;font-size:10px;font-weight:bold;padding:2px 4px;border-radius:3px;white-space:nowrap;display:none;border:1px solid #4da3ff;"></div></div>`,
+        className:'incident-marker', iconSize:[40,50], iconAnchor:[20,25]
+    })}).addTo(map);
+    activeIncidentMarkers[id]={ marker,type,lat,lng,address,startTime:now,
+        timeline:[`[${now.toLocaleTimeString()}] For Verification`],
+        status:"For Verification", alarm:"N/A", isResolved:false };
+    if(type==='fire') incidentCounts.fire++; else incidentCounts.med++;
+    updateGlobalStats(); updatePopup(id);
+};
+
+window.updatePopup = function(id) {
+    const d = activeIncidentMarkers[id];
+    if (d.isResolved) { d.marker.bindPopup(`<div style="color:white;"><b>RESOLVED ${d.type.toUpperCase()}</b><br><small>${d.address}</small><hr>${d.status}</div>`).openPopup(); return; }
+    let c = `<div style="color:white;min-width:220px;"><b>${d.type.toUpperCase()} INCIDENT</b><hr>`;
+    if (d.type==='fire') {
+        c = `<div style="color:white;min-width:220px;"><b>FIRE INCIDENT</b><hr><label style="font-size:10px;">Classification:</label><select id="status-${id}" class="status-select" onchange="handleStatusChange('${id}')">`;
+        ["For Verification","False Alarm","Rubbish Fire","Post Fire","Vehicle fire","Grass fire","Residential","Commercial"].forEach(o=>c+=`<option value="${o}" ${d.status===o?'selected':''}>${o}</option>`);
+        c += `</select><div style="margin-top:10px;"><label style="font-size:10px;">Alarm Level:</label><select id="alarm-${id}" class="status-select" onchange="logAlarm('${id}')">`;
+        ["Fire out upon arrival","Fire on Progress","1st Alarm","2nd Alarm","3rd Alarm","4th Alarm","5th Alarm","Task Force Alpha","Task Force Bravo","Task Force Charlie","Task Force Delta","Task Force Echo","Task Force Hotel","Task Force India","General Alarm","Under Control","Fire Out"].forEach(a=>c+=`<option value="${a}" ${d.alarm===a?'selected':''}>${a}</option>`);
+        c += `</select></div>`;
+    } else {
+        c = `<div style="color:white;min-width:220px;"><b>MEDICAL INCIDENT</b><hr><label style="font-size:10px;">Medical Emergency Type:</label><select id="status-${id}" class="status-select" onchange="handleMedicalStatusChange('${id}')">`;
+        ["For Verification","Suspected Heart Attack / Cardiac Arrest","Suspected Stroke","Vehicular Accident","Drowning","Possible Suicide","Falling Incident","Fire Incident","Electrocution","Other"].forEach(o=>c+=`<option value="${o}" ${d.status.startsWith(o)?'selected':''}>${o}</option>`);
+        c += `</select><div id="other-input-div-${id}" style="display:${d.status.startsWith('Other')?'block':'none'};margin-top:10px;"><input type="text" id="other-text-${id}" placeholder="Type specific emergency..." style="width:100%;padding:5px;color:black;" oninput="updateOtherMedicalText('${id}')"></div>`;
+    }
+    c += `<br><br><button onclick="resolveIncident('${id}')" style="background:#217346;color:white;border:none;padding:8px;width:100%;cursor:pointer;font-weight:bold;">RESOLVE &amp; SAVE</button>
+          <button onclick="deleteIncident('${id}')" style="background:#ff0000;color:white;border:none;padding:8px;width:100%;margin-top:5px;cursor:pointer;">DELETE</button></div>`;
+    d.marker.bindPopup(c).openPopup();
+};
+
+window.handleStatusChange = function(id) {
+    const v=document.getElementById(`status-${id}`).value, d=activeIncidentMarkers[id];
+    if(d.status!==v){d.status=v;d.timeline.push(`[${new Date().toLocaleTimeString()}] Status: ${v}`);updatePopup(id);}
+};
+window.handleMedicalStatusChange = function(id) {
+    const v=document.getElementById(`status-${id}`).value, d=activeIncidentMarkers[id];
+    const lbl=document.getElementById(`label-${id}`), od=document.getElementById(`other-input-div-${id}`);
+    d.status=v; if(od) od.style.display=v==='Other'?'block':'none';
+    if(lbl){if(v==="For Verification"||v==="Other") lbl.style.display="none"; else{lbl.innerText=v.toUpperCase();lbl.style.display="inline-block";lbl.style.color="#4da3ff";}}
+    d.timeline.push(`[${new Date().toLocaleTimeString()}] Type: ${v}`);
+};
+window.updateOtherMedicalText = function(id) {
+    const t=document.getElementById(`other-text-${id}`).value, d=activeIncidentMarkers[id];
+    const lbl=document.getElementById(`label-${id}`);
+    if(t.trim()){d.status="Other: "+t;if(lbl){lbl.innerText=t.toUpperCase();lbl.style.display="inline-block";}}
+    else if(lbl) lbl.style.display="none";
+};
+window.logAlarm = function(id) {
+    const v=document.getElementById(`alarm-${id}`).value, d=activeIncidentMarkers[id];
+    const lbl=document.getElementById(`label-${id}`);
+    if(d.alarm===v) return;
+    const tact=["Fire on Progress","1st Alarm","2nd Alarm","3rd Alarm","4th Alarm","5th Alarm","Task Force Alpha","Task Force Bravo","Task Force Charlie","Task Force Delta","Task Force Echo","Task Force Hotel","Task Force India","General Alarm"];
+    if(tact.includes(d.alarm)) d.lastTacticalLevel=d.alarm;
+    d.alarm=v; d.timeline.push(`${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} - ${v}`);
+    if(lbl){
+        if(v==="Fire Out"){lbl.innerText=`FIRE OUT (${d.lastTacticalLevel||"Verified"})`;lbl.style.display="inline-block";setTimeout(()=>resolveIncident(id),500);}
+        else if(tact.includes(v)){lbl.innerText=v;lbl.style.display="inline-block";}
+        else lbl.style.display="none";
+    }
+};
+window.resolveIncident = function(id) {
+    const d=activeIncidentMarkers[id]; if(!d||d.isResolved) return;
+    const end=new Date(), ms=end-d.startTime;
+    dailyReportLog.push({"Incident ID":id,"Initial Type":d.type.toUpperCase()==="FIRE"?"FIRE":"MED",
+        "Specific Location":d.address||"Unknown","Reported":d.startTime.toLocaleTimeString(),
+        "Resolved":end.toLocaleTimeString(),"Duration":`${Math.floor(ms/60000)}m ${Math.floor((ms%60000)/1000)}s`,
+        "Classification":d.status,"Final Alarm":d.alarm||"N/A","Progression Timeline":d.timeline.join(" \n ")});
+    if(d.type==='fire') incidentCounts.fire--; else incidentCounts.med--;
+    d.isResolved=true;
+    const inn=document.getElementById(`icon-inner-${id}`); if(inn) inn.style.filter="grayscale(100%) opacity(0.6)";
+    map.closePopup(); updateGlobalStats();
+};
+window.deleteIncident = function(id) {
+    const d=activeIncidentMarkers[id]; if(!d) return;
+    map.removeLayer(d.marker);
+    if(!d.isResolved){if(d.type==='fire') incidentCounts.fire=Math.max(0,incidentCounts.fire-1); else incidentCounts.med=Math.max(0,incidentCounts.med-1);}
+    delete activeIncidentMarkers[id]; updateGlobalStats();
+};
+window.exportToExcel = function() {
+    if(dailyReportLog.length===0) return alert("No reports to export.");
+    const wb=XLSX.utils.book_new();
+    const fire=dailyReportLog.filter(i=>i["Initial Type"]==="FIRE").map(i=>({
+        "Incident ID":i["Incident ID"],"Type":i["Initial Type"],"Barangay":i["Specific Location"],
+        "Reported":i["Reported"],"Resolved":i["Resolved"],"Duration":i["Duration"],
+        "Classification":i["Classification"],"Final Alarm":i["Final Alarm"],"Progression Timeline":i["Progression Timeline"]}));
+    const med=dailyReportLog.filter(i=>i["Initial Type"]==="MED").map(i=>({
+        "Incident ID":i["Incident ID"],"Type":i["Initial Type"],"Specific Location":i["Specific Location"],
+        "Medical Emergency Type":i["Classification"],"Reported":i["Reported"],"Resolved":i["Resolved"],"Duration":i["Duration"]}));
+    if(fire.length>0) XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(fire),"Fire Incidents");
+    if(med.length>0)  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(med),"Medical Incidents");
+    XLSX.writeFile(wb,`TULONG_Report_${new Date().toLocaleDateString()}.xlsx`);
+};
+window.wipeMapAndExport = function() {
+    if(confirm("⚠️ ARE YOU SURE TO WIPE MAP?")){
+        exportToExcel();
+        for(let id in activeIncidentMarkers) map.removeLayer(activeIncidentMarkers[id].marker);
+        activeIncidentMarkers={}; dailyReportLog=[]; incidentCounts={fire:0,med:0}; updateGlobalStats();
+    }
+};
+function updateGlobalStats() {
+    document.getElementById('total-incidents').innerText = incidentCounts.fire+incidentCounts.med;
+    infoCounter.update();
+}
+
+// ============================================================
+// FIRE STATIONS
+// ============================================================
+const x0 = [
+    {name:"BFP Regional Office VII",            number:"(032) 517 9027",   lat:10.2979789, lng:123.8922118, type:"bfp"},
+    {name:"Cebu City Fire Station (Pari-an)",   number:"(032) 255 0785",   lat:10.2993222, lng:123.9034484, type:"bfp"},
+    {name:"Labangon Fire Station",              number:"(032) 261 0911",   lat:10.2991806, lng:123.8810782, type:"bfp"},
+    {name:"Guadalupe Fire Sub-Station",         number:"+63 947 523 6144", lat:10.3225746, lng:123.8840113, type:"bfp"},
+    {name:"Lahug Fire Sub-Station",             number:"(032) 256 0541",   lat:10.3243147, lng:123.8985383, type:"bfp"},
+    {name:"Apas Fire Sub-Station",              number:"(032) 416 5103",   lat:10.3371357, lng:123.9048811, type:"bfp"},
+    {name:"Mabolo Fire Sub-Station",            number:null,               lat:10.3122927, lng:123.9159289, type:"bfp"},
+    {name:"Cebu Business Park Sub-Station",     number:"0917 505 1100",    lat:10.3138334, lng:123.9083305, type:"bfp"},
+    {name:"BFP R7 Mandaue City",                number:"(032) 344 4747",   lat:10.3230721, lng:123.9412341, type:"bfp"},
+    {name:"BFP Gun-Ob (Main/COMMEL)",           number:"(032) 340-0252",   lat:10.3019,    lng:123.9512,    type:"bfp"},
+    {name:"Lapu-Lapu City Fire Station 1",      number:"0999 972 1111",    lat:10.30525,   lng:123.958844,  type:"bfp"},
+    {name:"Poblacion Sub-Station (Stn 2)",      number:"(032) 326-4638",   lat:10.313143,  lng:123.948846,  type:"bfp"},
+    {name:"Babag Sub-Station (Stn 3)",          number:"(032) 410-8229",   lat:10.28666,   lng:123.944331,  type:"bfp"},
+    {name:"Marigondon Sub-Station (Stn 4)",     number:"(032) 328-0917",   lat:10.27591,   lng:123.975443,  type:"bfp"},
+    {name:"Mactan Sub-Station (Stn 5)",         number:"(032) 342-8508",   lat:10.309056,  lng:124.01114,   type:"bfp"},
+    {name:"Olango Island Fire Station (Stn 6)", number:"0923-815-7696",    lat:10.271054,  lng:124.060161,  type:"bfp"},
+    {name:"TINAGO Fire Brigade",                number:null,               lat:10.2971754, lng:123.9088248, type:"volunteer"},
+    {name:"LAHUG Fire Brigade",                 number:null,               lat:10.3244675, lng:123.8985555, type:"volunteer"},
+    {name:"Cebu Filipino-Chinese VFB",          number:"(032) 254 0200",   lat:10.310547,  lng:123.8891627, type:"volunteer"},
+    {name:"NARF Rescue and Fire Brigade",       number:null,               lat:10.3159419, lng:123.8959584, type:"volunteer"},
+    {name:"Cebu Chamber VFB",                   number:"(032) 254 0200",   lat:10.3009152, lng:123.9012345, type:"volunteer"},
+    {name:"ERUF Fire Brigade",                  number:"0918 921 0000",    lat:10.2964812, lng:123.9029182, type:"volunteer"},
+    {name:"ERUF Lapu-Lapu",                     number:"(032) 340-2994",   lat:10.317454,  lng:123.963162,  type:"volunteer"},
+    {name:"Naga City Fire Station",             number:"(032) 272 6410",   lat:10.2080,    lng:123.7580,    type:"bfp"},
+    {name:"Talisay City Fire Station",          number:"(032) 272 8277",   lat:10.2450,    lng:123.8490,    type:"bfp"},
+    {name:"Minglanilla Fire Station",           number:"(032) 273 2830",   lat:10.2440,    lng:123.7960,    type:"bfp"},
+    {name:"Liloan Fire Station",                number:"(032) 564 3781",   lat:10.3990,    lng:123.9990,    type:"bfp"},
+    {name:"Argao Fire Station",                 number:"(032) 367 7680",   lat:9.8790,     lng:123.5950,    type:"bfp"},
+    {name:"Bogo City Fire Station",             number:"(032) 434 8575",   lat:11.0506,    lng:124.0048,    type:"bfp"},
+    {name:"Danao City Fire Station",            number:"(032) 200 4000",   lat:10.5233,    lng:124.0300,    type:"bfp"},
+    {name:"Toledo City Fire Station",           number:"(032) 322 5755",   lat:10.3789,    lng:123.6386,    type:"bfp"},
+    {name:"Consolacion Fire Station",           number:"(032) 423 3037",   lat:10.3794,    lng:123.9535,    type:"bfp"},
+];
+
+const sc = document.getElementById('station-container');
+document.getElementById('station-count').innerText = x0.length;
+x0.forEach(s => {
+    L.marker([s.lat,s.lng],{icon:s.type==="bfp"?fireIcon:volunteerIcon}).addTo(map)
+     .bindPopup(`<b>${s.name}</b><br>📞 ${s.number||"N/A"}`);
+    const d=document.createElement('div'); d.className='station-item';
+    d.innerHTML=`<b>${s.type.toUpperCase()}</b>: ${s.name}`;
+    d.onclick=()=>map.flyTo([s.lat,s.lng],16); sc.appendChild(d);
+});
+
+// ============================================================
+// BLYNK ESP32 — unit marker colors: STANDBY=green, ARRIVED=red, RESPONDING=orange
+// ============================================================
+let unitStates={}, unitMarkers={};
+const prevButtonStates={}; // track previous button states to detect changes
+
+async function fetchUnit(unit) {
+    // Skip placeholder tokens entirely — treat as offline without hitting API
+    if (!unit.token || unit.token.includes('TOKEN_') || unit.token.length < 20) {
+        const prev = prevButtonStates[unit.id] || {online: null};
+        if (prev.online !== false) {
+            const unitLabel = `<b>${unit.id}</b> (${unit.type === 'firetruck' ? '🚒 Firetruck' : '🚑 Ambulance'})`;
+            termLog('err', `${unitLabel} &mdash; No valid token configured`);
+        }
+        prevButtonStates[unit.id] = {...(prevButtonStates[unit.id]||{}), online: false};
+        unitStates[unit.id] = {...(unitStates[unit.id]||{}), online: false};
+        return false;
+    }
+    const unitLabel = `<b>${unit.id}</b> (${unit.type === 'firetruck' ? '🚒 Firetruck' : '🚑 Ambulance'})`;
+
+    function markOffline() {
+        const prev = prevButtonStates[unit.id] || {};
+        // Only announce once — when transitioning from online/unknown to offline
+        if (prev.online !== false) {
+            termLog('err', `${unitLabel} is now <b>OFFLINE</b>`);
+            if (!terminalOpen) toggleTerminal();
+        }
+        prevButtonStates[unit.id] = {...prev, online: false};
+        unitStates[unit.id] = {...(unitStates[unit.id]||{}), online: false};
+        if (unitMarkers[unit.id]) {
+            map.removeLayer(unitMarkers[unit.id]);
+            delete unitMarkers[unit.id];
+        }
+    }
+
+    try {
+        // Step 1: Check if hardware is ACTUALLY connected right now
+        const connRes = await fetch(`${BLYNK_BASE}/isHardwareConnected?token=${unit.token}`);
+        if (!connRes.ok) { markOffline(); return false; }
+        const connText = await connRes.text();
+        if (connText.toLowerCase().includes('invalid')) { markOffline(); return false; }
+        const isConnected = connText.trim() === 'true';
+
+        if (!isConnected) {
+            // Device is definitively offline — mark it and stop
+            markOffline();
+            return false;
+        }
+
+        // Step 2: Device confirmed ONLINE — fetch pin values
+        const res = await fetch(`${BLYNK_BASE}/get?token=${unit.token}&v${V_STANDBY}&v${V_RESPONDING}&v${V_ARRIVED}&v${V_LOCATION}`);
+        if (!res.ok) { markOffline(); return false; }
+        const text = await res.text();
+        if (text.toLowerCase().includes('invalid')) { markOffline(); return false; }
+        let data;
+        try { data = JSON.parse(text); } catch(e) { markOffline(); return false; }
+        const standby    = parseFloat(data[`v${V_STANDBY}`])    > 0;
+        const responding = parseFloat(data[`v${V_RESPONDING}`]) > 0;
+        const arrived    = parseFloat(data[`v${V_ARRIVED}`])    > 0;
+        const locRaw     = data[`v${V_LOCATION}`];
+        let lon=null, lat=null;
+        if (Array.isArray(locRaw)&&locRaw.length>=2) { lon=parseFloat(locRaw[0]); lat=parseFloat(locRaw[1]); }
+        else if (typeof locRaw==='string'&&locRaw.includes(',')) { const p=locRaw.split(','); lon=parseFloat(p[0]); lat=parseFloat(p[1]); }
+        else if (locRaw&&typeof locRaw==='object') { lon=parseFloat(locRaw.lon||locRaw[0]); lat=parseFloat(locRaw.lat||locRaw[1]); }
+        if (lat&&lon) {
+            if (lat<4||lat>21||lon<116||lon>127) { [lat,lon]=[lon,lat]; if(lat<4||lat>21||lon<116||lon>127){lat=null;lon=null;} }
+        }
+
+        // Step 3: Compare with previous state and log changes
+        const prev = prevButtonStates[unit.id] || {standby:null, responding:null, arrived:null, online:null};
+
+        // Announce ONLINE — triggers on first boot (null) or reconnect (false)
+        if (prev.online !== true) {
+            if (prev.online === null) {
+                termLog('ok', `${unitLabel} is now <b>ONLINE</b>`);
+            } else {
+                termLog('ok', `${unitLabel} reconnected &mdash; is now <b>ONLINE</b>`);
+            }
+            if (!terminalOpen) toggleTerminal();
+        }
+
+        // Log button presses (only on rising edge: OFF → ON)
+        if (standby    && prev.standby    !== standby)    termLog('recv', `[${unit.id}] 🟢 &mdash; <b>STANDBY</b>`);
+        if (responding && prev.responding !== responding) termLog('recv', `[${unit.id}] 🟠 &mdash; <b>RESPONDING</b>`);
+        if (arrived    && prev.arrived    !== arrived)    termLog('recv', `[${unit.id}] 🔴 &mdash; <b>ARRIVED</b>`);
+
+        prevButtonStates[unit.id] = {standby, responding, arrived, online: true};
+        unitStates[unit.id] = {standby, responding, arrived, lat, lon, type: unit.type, online: true};
+        if (lat&&lon) updateUnitMarker(unit.id, unitStates[unit.id]);
+        return true;
+
+    } catch(e) {
+        // Network error or unexpected failure — treat as offline
+        markOffline();
+        return false;
+    }
+}
+
+function updateUnitMarker(id, s) {
+    // STANDBY = green (#27ae60), ARRIVED = red (#ff4d4d), RESPONDING = orange (#f0883e)
+    const color      = s.responding ? '#f0883e' : s.arrived ? '#ff4d4d' : '#27ae60';
+    const lbl        = s.responding ? 'RESPONDING' : s.arrived ? 'ARRIVED' : 'STANDBY';
+    const img        = s.type==='firetruck' ? 'firetruck.png' : 'AMBULANCE.png';
+    const sz         = s.type==='firetruck' ? 25 : 35;
+    // Vehicle type pin: FIRETRUCK = red pin, AMBULANCE = blue pin
+    const pinColor = s.type==='firetruck' ? '#ff4d4d' : '#1a8cff';
+    const icon  = L.divIcon({className:'', iconSize:[44,70], iconAnchor:[22,70],
+        html:`<div style="text-align:center;width:44px;"><svg width="44" height="56" viewBox="0 0 44 56" xmlns="http://www.w3.org/2000/svg" style="display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.5));"><path d="M22 0 C10 0 0 10 0 22 C0 36 22 56 22 56 C22 56 44 36 44 22 C44 10 34 0 22 0 Z" fill="${pinColor}"/><circle cx="22" cy="21" r="16" fill="white"/><image href="${img}" x="6" y="5" width="32" height="32"/></svg><div style="background:${color};color:#fff;font-size:8px;font-weight:bold;padding:1px 5px;border-radius:3px;white-space:nowrap;margin-top:2px;display:inline-block;box-shadow:0 1px 4px rgba(0,0,0,0.4);">${id}</div></div>`});
+    const popup = `<div style="color:white;min-width:150px;">
+        <b>${id}</b><br>
+        <span style="background:${color};padding:2px 6px;border-radius:3px;font-size:11px;">${lbl}</span><br><br>
+        <span style="font-size:10px;color:#8b949e;">
+          ${s.type==='firetruck'?'🚒 Firetruck':'🚑 Ambulance'}<br>
+          Lat: ${s.lat?s.lat.toFixed(6):'N/A'} &nbsp; Lon: ${s.lon?s.lon.toFixed(6):'N/A'}
+        </span></div>`;
+    if (unitMarkers[id]) { unitMarkers[id].setLatLng([s.lat,s.lon]); unitMarkers[id].setIcon(icon); unitMarkers[id].setPopupContent(popup); }
+    else unitMarkers[id]=L.marker([s.lat,s.lon],{icon}).addTo(map).bindPopup(popup);
+}
+
+function renderUnitList() {
+    document.getElementById('unit-list').innerHTML = UNITS.map(u => {
+        const s=unitStates[u.id];
+        const status=!s||!s.online?'offline':s.responding?'responding':s.arrived?'arrived':s.standby?'standby':'offline';
+        const coords=s&&s.lat&&s.lon?`${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}`:'No GPS fix';
+        const click=s&&s.lat&&s.lon?`onclick="map.flyTo([${s.lat},${s.lon}],16)"` :'';
+        return `<div class="unit-card s-${status}" ${click}>
+            <div class="uc-row"><span class="uc-id">${u.id}</span><span class="uc-badge b-${status}">${status.toUpperCase()}</span></div>
+            <div class="uc-sub">${u.type==='firetruck'?'🚒':'🚑'} ${coords}</div>
+        </div>`;
+    }).join('');
+}
+
+function updateOverlayCounts() {
+    const st=Object.values(unitStates);
+    // Count ALL online units regardless of button state
+    const trucks=st.filter(s=>s.online&&s.type==='firetruck').length;
+    const ambs  =st.filter(s=>s.online&&s.type==='ambulance').length;
+    document.getElementById('active-vehicles').innerText=trucks+ambs;
+    const ot=document.getElementById('ov-trucks'), oa=document.getElementById('ov-ambs');
+    if(ot) ot.innerText=trucks; if(oa) oa.innerText=ambs;
+}
+
+async function pollAll() {
+    let ok=false;
+    for (const u of UNITS) { if(await fetchUnit(u)) ok=true; }
+    renderUnitList(); updateOverlayCounts(); updateGlobalStats();
+    document.getElementById('blynk-dot').className='blynk-dot '+(ok?'online':'offline');
+    document.getElementById('blynk-label').textContent='Blynk sync: '+new Date().toLocaleTimeString('en-PH',{hour12:false});
+}
+
+// ============================================================
+// LOGOUT
+// ============================================================
+document.getElementById('logout-trigger').addEventListener('click', function() {
+    if (confirm("CONFIRM SYSTEM LOGOUT?\nPLEASE DOWNLOAD EOD REPORT FIRST")) {
+        window.firebaseSignOut&&window.firebaseSignOut().then(()=>{ window.location.href='login.html'; }).catch(e=>console.error(e));
+    }
+});
+
+setTimeout(()=>map.invalidateSize(),500);
+pollAll();
+setInterval(pollAll,5000);
+
+// ============================================================
+// ESP32 TERMINAL — V3
+// ============================================================
+const V_TERMINAL = 3;
+let terminalOpen = false;
+
+function toggleTerminal() {
+    terminalOpen = !terminalOpen;
+    const panel = document.getElementById('terminal-panel');
+    const lbl   = document.getElementById('term-toggle-lbl');
+    const blynkBar = document.getElementById('blynk-bar-el');
+    panel.classList.toggle('open', terminalOpen);
+    lbl.innerHTML = terminalOpen ? '&#9660; COLLAPSE' : '&#9650; EXPAND';
+    blynkBar.style.bottom = terminalOpen ? '228px' : '8px';
+    if (terminalOpen) {
+        termLog('sys', '[ T.U.L.O.N.G. Terminal Ready — Virtual Pin V' + V_TERMINAL + ' ]');
+        setTimeout(() => document.getElementById('t-input').focus(), 300);
+    }
+}
+
+function termLog(type, msg) {
+    const log = document.getElementById('terminal-log');
+    const ts  = new Date().toLocaleTimeString('en-PH', {hour12: false});
+    const cls = {sys:'t-sys', send:'t-send', ok:'t-ok', err:'t-err', recv:'t-recv'}[type] || 't-sys';
+    const prefix = {sys:'[SYS]', send:'[TX >>]', ok:'[ACK]', err:'[ERR]', recv:'[RX <<]'}[type] || '[LOG]';
+    const line = document.createElement('div');
+    line.innerHTML = `<span style="color:#444;">${ts}</span> <span class="${cls}">${prefix}</span> ${msg}`;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+}
+
+async function sendToUnit(unit, message) {
+    try {
+        const url = `${BLYNK_BASE}/update?token=${unit.token}&v${V_TERMINAL}=${encodeURIComponent(message)}`;
+        const res = await fetch(url);
+        if (res.ok) {
+            termLog('ok', `[${unit.id}] &rarr; "${message}" sent OK`);
+        } else {
+            termLog('err', `[${unit.id}] HTTP ${res.status} — failed`);
+        }
+    } catch(e) {
+        termLog('err', `[${unit.id}] Network error: ${e.message}`);
+    }
+}
+
+async function terminalSend() {
+    const input  = document.getElementById('t-input');
+    const target = document.getElementById('t-target').value;
+    const msg    = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+
+    const targets = target === 'ALL' ? UNITS : UNITS.filter(u => u.id === target);
+    if (targets.length === 0) { termLog('err', 'No matching unit found.'); return; }
+
+    termLog('send', `To <b>${target}</b>: "${msg}"`);
+    for (const unit of targets) {
+        await sendToUnit(unit, msg);
+    }
+}
+
+// populate target dropdown whenever UNITS is defined
+(function populateTargetSelect() {
+    const sel = document.getElementById('t-target');
+    UNITS.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = `${u.id} (${u.type})`;
+        sel.appendChild(opt);
+    });
+})();
+
+// Enter key support
+document.getElementById('t-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') terminalSend();
+});
+
+// ============================================================
+// TERMINAL RX — uses /data/get history so NO messages are missed
+// ============================================================
+// Track the timestamp of the last message we already logged per unit
+const lastSeenTs = {};
+
+async function pollTerminalRx() {
+    for (const unit of UNITS) {
+        try {
+            // Fetch last 10 datapoints from V3 history for this unit
+            const url = `${BLYNK_BASE}/data/get?token=${unit.token}&pin=v${V_TERMINAL}&limit=10&order=DESC`;
+            const res = await fetch(url);
+            if (!res.ok) continue;
+            const rows = await res.json(); // array of {ts, value} newest first
+            if (!Array.isArray(rows) || rows.length === 0) continue;
+
+            // Initialise cursor on very first poll so we dont replay old history
+            if (lastSeenTs[unit.id] === undefined) {
+                lastSeenTs[unit.id] = rows[0].ts;
+                continue;
+            }
+
+            // Collect only rows newer than what we have already shown
+            const newRows = rows.filter(r => r.ts > lastSeenTs[unit.id]);
+            if (newRows.length === 0) continue;
+
+            // Log oldest-first so messages appear in chronological order
+            newRows.reverse().forEach(r => {
+                let msg = Array.isArray(r.value) ? r.value[0] : r.value;
+                if (typeof msg !== 'string') msg = String(msg ?? '');
+                msg = msg.trim();
+                if (!msg || msg === '0') return;
+                termLog('recv', `[${unit.id}] ${msg}`);
+            });
+
+            // Advance cursor to the newest row we just processed
+            lastSeenTs[unit.id] = rows[0].ts;
+
+            // Auto-expand terminal when a new message arrives
+            if (!terminalOpen) {
+                toggleTerminal();
+                termLog('sys', '— New message received, terminal opened —');
+            }
+
+        } catch(e) { /* silent — unit may be offline or token invalid */ }
+    }
+}
+
+// Poll RX every 2 seconds for near-real-time feel
+setInterval(pollTerminalRx, 2000);
+// Run once immediately after a short delay (let UNITS and terminal init first)
+setTimeout(pollTerminalRx, 1500);
+</script>
+<!-- REGISTER EMERGENCY VEHICLE MODAL — insert before </body> in main dashboard -->
+
+<!-- Register Button (add after logout-btn in sidebar) -->
+<!-- <button class="register-btn" onclick="openRegisterModal()">&#43; Register Emergency Vehicle</button> -->
+
+<style>
+.register-btn {
+    width: 100%; padding: 10px; background: rgba(26,140,255,0.12);
+    color: #1a8cff; border: 1px solid #1a8cff; border-radius: 4px;
+    font-weight: bold; text-transform: uppercase; font-size: 11px;
+    cursor: pointer; letter-spacing: 1px; transition: all 0.3s ease; margin-top: 5px;
+}
+.register-btn:hover { background: #1a8cff; color: white; box-shadow: 0 0 15px rgba(26,140,255,0.3); }
+
+/* ── Modal overlay ── */
+.reg-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.82); z-index: 9000;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.reg-overlay.active { display: flex; }
+
+.reg-modal {
+    background: #011a33;
+    border: 1px solid #1a8cff;
+    border-radius: 12px;
+    padding: 32px 36px;
+    width: 460px;
+    max-width: 95vw;
+    box-shadow: 0 0 60px rgba(26,140,255,0.25), 0 24px 48px rgba(0,0,0,0.6);
+    position: relative;
+    animation: modalIn 0.25s ease;
+}
+@keyframes modalIn {
+    from { transform: translateY(-20px) scale(0.97); opacity: 0; }
+    to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.reg-modal-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+    border-bottom: 1px solid #1a3a5c; padding-bottom: 16px;
+}
+.reg-modal-icon {
+    width: 42px; height: 42px; background: linear-gradient(135deg,#1a8cff22,#1a8cff44);
+    border: 1px solid #1a8cff; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.reg-modal-title { font-size: 16px; font-weight: 800; letter-spacing: 1px; color: #fff; }
+.reg-modal-sub   { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 2px; margin-top: 2px; }
+
+.reg-close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; color: #8b949e;
+    font-size: 20px; cursor: pointer; line-height: 1;
+    transition: color 0.2s;
+}
+.reg-close:hover { color: #ff4d4d; }
+
+.reg-field { margin-bottom: 16px; }
+.reg-label {
+    display: block; font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; color: #8b949e; text-transform: uppercase; margin-bottom: 6px;
+}
+.reg-input, .reg-select {
+    width: 100%; padding: 10px 12px; box-sizing: border-box;
+    background: #020e1c; border: 1px solid #1a3a5c; border-radius: 6px;
+    color: #fff; font-size: 13px; font-family: 'Open Sans', sans-serif;
+    outline: none; transition: border-color 0.2s;
+}
+.reg-input:focus, .reg-select:focus { border-color: #1a8cff; }
+.reg-select option { background: #022649; }
+
+.reg-row { display: flex; gap: 12px; }
+.reg-row .reg-field { flex: 1; }
+
+.reg-divider {
+    border: 0; border-top: 1px solid #1a3a5c; margin: 20px 0;
+}
+
+.reg-section-lbl {
+    font-size: 10px; letter-spacing: 2px; color: #1a8cff;
+    text-transform: uppercase; margin-bottom: 14px; margin-top: 4px;
+    display: flex; align-items: center; gap: 8px;
+}
+.reg-section-lbl::after {
+    content: ''; flex: 1; height: 1px; background: #1a3a5c;
+}
+
+.reg-submit {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #1a3a6c, #1a8cff);
+    color: white; border: none; border-radius: 6px;
+    font-weight: 800; font-size: 13px; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer;
+    transition: all 0.2s; margin-top: 8px;
+    box-shadow: 0 4px 20px rgba(26,140,255,0.3);
+}
+.reg-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(26,140,255,0.45); }
+.reg-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.reg-status {
+    margin-top: 12px; padding: 10px 14px; border-radius: 6px;
+    font-size: 12px; font-weight: 600; display: none; text-align: center;
+}
+.reg-status.ok  { background: #0f2d1a; border: 1px solid #27ae60; color: #27ae60; display: block; }
+.reg-status.err { background: #2d0f0f; border: 1px solid #ff4d4d; color: #ff4d4d; display: block; }
+
+.reg-token-display {
+    background: #020e1c; border: 1px solid #1a3a5c; border-radius: 6px;
+    padding: 10px 12px; font-family: 'Courier New', monospace; font-size: 11px;
+    color: #ffcc00; word-break: break-all; margin-top: 8px; display: none;
+    line-height: 1.6;
+}
+
+.reg-pw-wrapper { position: relative; }
+.reg-pw-toggle {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: #8b949e; cursor: pointer; font-size: 13px;
+    padding: 0; line-height: 1;
+}
+.reg-pw-toggle:hover { color: #1a8cff; }
+</style>
+
+<!-- Modal HTML -->
+<div class="reg-overlay" id="reg-overlay" onclick="if(event.target===this)closeRegisterModal()">
+    <div class="reg-modal">
+        <button class="reg-close" onclick="closeRegisterModal()">&#x2715;</button>
+
+        <div class="reg-modal-header">
+            <div class="reg-modal-icon">🚨</div>
+            <div>
+                <div class="reg-modal-title">Register Emergency Vehicle</div>
+                <div class="reg-modal-sub">T.U.L.O.N.G. Unit Enrollment</div>
+            </div>
+        </div>
+
+        <div class="reg-section-lbl">Vehicle Information</div>
+
+        <div class="reg-row">
+            <div class="reg-field">
+                <label class="reg-label">Unit ID</label>
+                <input class="reg-input" id="reg-unit-id" type="text" placeholder="e.g. A-004" maxlength="10"/>
+            </div>
+            <div class="reg-field">
+                <label class="reg-label">Vehicle Type</label>
+                <select class="reg-select" id="reg-vtype">
+                    <option value="ambulance">🚑 Ambulance</option>
+                    <option value="firetruck">🚒 Firetruck</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="reg-field">
+            <label class="reg-label">Plate Number</label>
+            <input class="reg-input" id="reg-plate" type="text" placeholder="e.g. XYZ 1234" maxlength="12"/>
+        </div>
+
+        <div class="reg-field">
+            <label class="reg-label">Station / Agency</label>
+            <input class="reg-input" id="reg-station" type="text" placeholder="e.g. Cebu City Fire Station"/>
+        </div>
+
+        <div class="reg-field">
+            <label class="reg-label">Blynk Token (ESP32)</label>
+            <input class="reg-input" id="reg-token" type="text" placeholder="Paste Blynk device token here"/>
+        </div>
+
+        <hr class="reg-divider"/>
+        <div class="reg-section-lbl">Driver / Operator Account (User Dashboard Login)</div>
+
+        <div class="reg-field">
+            <label class="reg-label">Full Name</label>
+            <input class="reg-input" id="reg-name" type="text" placeholder="e.g. Juan Dela Cruz"/>
+        </div>
+
+        <div class="reg-field">
+            <label class="reg-label">Email Address</label>
+            <input class="reg-input" id="reg-email" type="email" placeholder="operator@email.com"/>
+        </div>
+
+        <div class="reg-field">
+            <label class="reg-label">Password</label>
+            <div class="reg-pw-wrapper">
+                <input class="reg-input" id="reg-password" type="password" placeholder="Min 6 characters" style="padding-right:36px;"/>
+                <button class="reg-pw-toggle" onclick="toggleRegPw()" id="reg-pw-eye">👁</button>
+            </div>
+        </div>
+
+        <button class="reg-submit" id="reg-submit-btn" onclick="submitRegistration()">
+            &#43; REGISTER UNIT &amp; CREATE ACCOUNT
+        </button>
+        <div class="reg-status" id="reg-status"></div>
+        <div class="reg-token-display" id="reg-token-display"></div>
+    </div>
+</div>
+
+<script type="module">
+// Firebase imports for registration
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDtYoKpqYE8MDc1dbZANQWwLxpp-heTBr8",
+    authDomain: "tulongtech-7de22.firebaseapp.com",
+    projectId: "tulongtech-7de22",
+    storageBucket: "tulongtech-7de22.firebasestorage.app",
+    messagingSenderId: "924023247315",
+    appId: "1:924023247315:web:45f4d22dc0e6c8436f1f26"
+};
+
+// Reuse existing app if already initialized
+const app  = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+window.openRegisterModal  = () => { document.getElementById('reg-overlay').classList.add('active'); clearRegForm(); };
+window.closeRegisterModal = () => document.getElementById('reg-overlay').classList.remove('active');
+window.toggleRegPw = () => {
+    const inp = document.getElementById('reg-password');
+    inp.type  = inp.type === 'password' ? 'text' : 'password';
+};
+
+function clearRegForm() {
+    ['reg-unit-id','reg-plate','reg-station','reg-token','reg-name','reg-email','reg-password'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.value='';
+    });
+    const st=document.getElementById('reg-status');
+    st.className='reg-status'; st.textContent='';
+    document.getElementById('reg-token-display').style.display='none';
+    document.getElementById('reg-submit-btn').disabled=false;
+}
+
+function regStatus(type, msg) {
+    const el = document.getElementById('reg-status');
+    el.className = `reg-status ${type}`;
+    el.textContent = msg;
+}
+
+window.submitRegistration = async function() {
+    const unitId   = document.getElementById('reg-unit-id').value.trim().toUpperCase();
+    const vtype    = document.getElementById('reg-vtype').value;
+    const plate    = document.getElementById('reg-plate').value.trim().toUpperCase();
+    const station  = document.getElementById('reg-station').value.trim();
+    const token    = document.getElementById('reg-token').value.trim();
+    const name     = document.getElementById('reg-name').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+
+    if (!unitId||!plate||!station||!name||!email||!password) {
+        regStatus('err','⚠ Please fill in all required fields.'); return;
+    }
+    if (password.length < 6) { regStatus('err','⚠ Password must be at least 6 characters.'); return; }
+
+    const btn = document.getElementById('reg-submit-btn');
+    btn.disabled = true;
+    regStatus('', '');
+
+    try {
+        // Create Firebase Auth account
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(cred.user, { displayName: name });
+
+        // Save vehicle + user metadata in Firestore
+        await setDoc(doc(db, 'vehicles', unitId), {
+            unitId, type: vtype, plate, station,
+            blynkToken: token || '',
+            operatorName: name, operatorEmail: email,
+            uid: cred.user.uid,
+            registeredAt: new Date().toISOString(),
+            role: 'operator'
+        });
+
+        // Save user profile doc
+        await setDoc(doc(db, 'users', cred.user.uid), {
+            name, email, role: 'operator',
+            unitId, vehicleType: vtype, station,
+            createdAt: new Date().toISOString()
+        });
+
+        // Show success
+        regStatus('ok', `✓ Unit ${unitId} registered! Account created for ${email}`);
+
+        // Show login credentials summary
+        const td = document.getElementById('reg-token-display');
+        td.style.display = 'block';
+        td.innerHTML = `
+            <b style="color:#1a8cff;">USER DASHBOARD LOGIN CREDENTIALS</b><br>
+            🌐 Login URL: <span style="color:#fff;">user-dashboard.html</span><br>
+            📧 Email: <span style="color:#fff;">${email}</span><br>
+            🔑 Password: <span style="color:#fff;">${password}</span><br>
+            🚗 Unit: <span style="color:#fff;">${unitId} — ${vtype === 'firetruck' ? '🚒 Firetruck' : '🚑 Ambulance'}</span><br>
+            🏥 Station: <span style="color:#fff;">${station}</span>
+        `;
+
+        btn.textContent = '✓ REGISTERED';
+        btn.style.background = 'linear-gradient(135deg,#0f2d1a,#27ae60)';
+
+    } catch (err) {
+        btn.disabled = false;
+        const msgs = {
+            'auth/email-already-in-use': '⚠ This email is already registered.',
+            'auth/invalid-email':        '⚠ Invalid email address.',
+            'auth/weak-password':        '⚠ Password is too weak.',
+        };
+        regStatus('err', msgs[err.code] || `⚠ Error: ${err.message}`);
+    }
+};
+</script>
+</body>
+</html>

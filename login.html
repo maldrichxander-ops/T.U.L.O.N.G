@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T.U.L.O.N.G. | Secure Access</title>
+    <style>
+        :root {
+            --primary-red: #ff4d4d;
+            --dark-blue: #022649;
+            --deeper-blue: #011a33;
+            --accent-blue: #4da3ff;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background: radial-gradient(circle at center, #043a6d 0%, #011a33 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(77, 163, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(77, 163, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 1;
+            background: rgba(1, 26, 51, 0.9);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--accent-blue);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(77, 163, 255, 0.2);
+            width: 600px;
+            height: auto;
+            min-height: 500px;
+            text-align: center;
+        }
+
+        .logo-area img {
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 10px;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            color: #aaa;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid #222;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 10px rgba(255, 77, 77, 0.2);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff0000, #8b0000);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            transition: transform 0.1s, box-shadow 0.3s;
+            font-size: 13px;
+        }
+
+        .login-btn:hover { box-shadow: 0 0 20px rgba(255, 0, 0, 0.4); }
+        .login-btn:active { transform: scale(0.98); }
+        .login-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+        /* ── ROLE ROUTING STATUS BAR ── */
+        .route-status {
+            display: none;
+            margin-top: 14px;
+            padding: 10px 14px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+        .route-status.checking {
+            display: block;
+            background: rgba(77,163,255,0.08);
+            border-color: rgba(77,163,255,0.3);
+            color: var(--accent-blue);
+        }
+        .route-status.admin {
+            display: block;
+            background: rgba(255,77,77,0.08);
+            border-color: rgba(255,77,77,0.3);
+            color: #ff4d4d;
+        }
+        .route-status.operator {
+            display: block;
+            background: rgba(39,174,96,0.08);
+            border-color: rgba(39,174,96,0.3);
+            color: #27ae60;
+        }
+        .route-status.error {
+            display: block;
+            background: rgba(255,77,77,0.06);
+            border-color: rgba(255,77,77,0.2);
+            color: #ff6666;
+        }
+
+        .scanline {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(77, 163, 255, 0.1);
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan {
+            from { top: 0; }
+            to   { top: 100%; }
+        }
+
+        .about-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(77, 163, 255, 0.2);
+            text-align: left;
+        }
+        .about-text {
+            font-size: 10px;
+            line-height: 1.5;
+            color: #888;
+            margin: 0;
+        }
+        .about-text strong { color: var(--primary-red); }
+
+        .tactical-footer {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: transparent;
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            border-radius: 2px;
+            min-width: 120px;
+            text-align: center;
+        }
+        .back-btn:hover {
+            background: var(--accent-blue);
+            color: #011a33;
+            box-shadow: 0 0 15px var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .system-footer {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            color: rgba(77, 163, 255, 0.5);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            pointer-events: none;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="scanline"></div>
+
+    <div class="logo-area">
+        <img src="tulonglogo.png" alt="T.U.L.O.N.G. Logo"
+             onerror="this.src='https://via.placeholder.com/80/ff4d4d/fff?text=T'">
+    </div>
+
+    <div class="brand-name">T.U.L.O.N.G.</div>
+    <div class="subtitle">Tactical Unit Locator &amp; Network Grid</div>
+
+    <form id="loginForm">
+        <div class="input-group">
+            <label>Operator ID / Email</label>
+            <input type="text" id="operatorId" placeholder="ENT-0000 or email@domain.com" required>
+        </div>
+        <div class="input-group">
+            <label>Security Clearance Code</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="login-btn" id="loginBtn">Initialize Connection</button>
+    </form>
+
+    <!-- Role routing feedback -->
+    <div class="route-status" id="routeStatus"></div>
+
+    <div class="about-section">
+        <p class="about-text">
+            T.U.L.O.N.G. is a dedicated tactical grid designed to bridge the gap in
+            <strong>"last mile"</strong> emergency response. Our mission is to empower
+            local units with real-time data for faster, coordinated community safety.
+        </p>
+        <div class="tactical-footer">
+            <a href="aboutUs.html"   class="back-btn">ABOUT US</a>
+            <a href="contactUs.html" class="back-btn">CONTACT US</a>
+            <a href="fundUs.html"    class="back-btn">FUND US</a>
+        </div>
+    </div>
+</div>
+
+<footer class="system-footer">&copy; 2026 T.U.L.O.N.G.</footer>
+
+<!-- ══════════════════════════════════════════════════════
+     FIREBASE — Auth + Firestore role check
+     ══════════════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }                      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey:            "AIzaSyDtYoKpqYE8MDc1dbZANQWwLxpp-heTBr8",
+    authDomain:        "tulongtech-7de22.firebaseapp.com",
+    projectId:         "tulongtech-7de22",
+    storageBucket:     "tulongtech-7de22.firebasestorage.app",
+    messagingSenderId: "924023247315",
+    appId:             "1:924023247315:web:45f4d22dc0e6c8436f1f26"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const loginForm   = document.getElementById('loginForm');
+const btn         = document.getElementById('loginBtn');
+const routeStatus = document.getElementById('routeStatus');
+
+function setStatus(type, msg) {
+    routeStatus.className = `route-status ${type}`;
+    routeStatus.textContent = msg;
+}
+
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const rawId   = document.getElementById('operatorId').value.trim();
+    const password = document.getElementById('password').value;
+
+    // Accept plain email OR convert ENT-xxxx → ENT-xxxx@tulong.com
+    const email = rawId.includes('@') ? rawId : `${rawId}@tulong.com`;
+
+    btn.innerText = "VERIFYING CLEARANCE...";
+    btn.disabled  = true;
+    setStatus('checking', '⬡ AUTHENTICATING...');
+
+    try {
+        // ── Step 1: Firebase Auth ──────────────────────────
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+
+        setStatus('checking', '⬡ CHECKING CLEARANCE LEVEL...');
+
+        // ── Step 2: Route by email — only one admin account ──
+        // ONLY this exact email is routed to the admin dashboard.
+        // Every other account, no exceptions, goes to user-dashboard.
+        const ADMIN_EMAIL = 'admin22@tulong.com';
+
+        if (cred.user.email.toLowerCase() === ADMIN_EMAIL) {
+            btn.innerText = "ACCESS GRANTED — ADMIN";
+            btn.style.background = "linear-gradient(45deg, #ff0000, #8b0000)";
+            setStatus('admin', '🔴 ADMIN ACCESS — Routing to Command Dashboard...');
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+
+        } else {
+            // Every registered operator lands here — no exceptions
+            btn.innerText = "ACCESS GRANTED — OPERATOR";
+            btn.style.background = "linear-gradient(45deg, #00cc44, #006622)";
+            setStatus('operator', '🟢 OPERATOR ACCESS — Routing to Unit Dashboard...');
+            setTimeout(() => { window.location.href = 'user-dashboard.html'; }, 1000);
+        }
+
+    } catch (error) {
+        console.error('Login error:', error.code);
+
+        const errorMessages = {
+            'auth/user-not-found':     'ACCESS DENIED: OPERATOR ID NOT FOUND',
+            'auth/wrong-password':     'ACCESS DENIED: INVALID SECURITY CODE',
+            'auth/invalid-email':      'ACCESS DENIED: INVALID OPERATOR ID FORMAT',
+            'auth/invalid-credential': 'ACCESS DENIED: INVALID CREDENTIALS',
+            'auth/too-many-requests':  'ACCOUNT LOCKED: TOO MANY FAILED ATTEMPTS',
+            'auth/network-request-failed': 'CONNECTION FAILED: CHECK NETWORK',
+        };
+
+        const msg = errorMessages[error.code] || `ACCESS DENIED: ${error.code}`;
+        setStatus('error', `⚠ ${msg}`);
+
+        btn.innerText = "Initialize Connection";
+        btn.disabled  = false;
+        btn.style.background = '';
+    }
+});
+</script>
+
+</body>
+</html>

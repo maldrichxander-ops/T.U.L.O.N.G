@@ -1,0 +1,116 @@
+ 
+        body {
+            background-color: #022649;
+            color: white;
+            margin: 0; padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex; flex-direction: column;
+            height: 100vh; overflow: hidden;
+        }
+
+        .header-container {
+            display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3); border-bottom: 1px solid #043a6d;
+            height: 70px; box-sizing: border-box;
+        }
+
+        .brand-badge {
+            background: linear-gradient(45deg, #ff0000, #8b0000);
+            color: white; padding: 5px 12px; border-radius: 5px;
+            font-weight: bold; letter-spacing: 2px;
+        }
+
+        .main-wrapper { display: flex; flex-grow: 1; height: calc(100vh - 70px); }
+
+        .sidebar {
+            width: 220px; background: #011a33; padding: 15px;
+            display: flex; flex-direction: column; gap: 10px;
+            border-right: 1px solid #043a6d; overflow-y: auto;
+        }
+
+        .stat-box {
+            background: #0c0c0c; border: 1px solid #222;
+            border-radius: 8px; padding: 15px; text-align: center;
+        }
+
+        .stat-number { font-size: 28px; font-weight: bold; display: block; color: #ff4d4d; }
+        .stat-label { font-size: 11px; color: #888; text-transform: uppercase; }
+
+        .report-btn {
+            background: #ff4d4d; color: white; border: none;
+            padding: 12px; border-radius: 5px; font-weight: bold;
+            cursor: pointer; margin-bottom: 5px; text-transform: uppercase; width: 100%;
+        }
+        .report-btn:hover { background: #ff1a1a; }
+        .report-active { background: #ffcc00; color: black; outline: 3px solid white; }
+
+        .excel-btn {
+            background: #217346; color: white; border: none;
+            padding: 10px; border-radius: 5px; font-weight: bold;
+            cursor: pointer; width: 100%; margin-top: 5px;
+            font-size: 11px; text-transform: uppercase;
+        }
+
+        .wipe-btn {
+            background: #d35400; color: white; border: none;
+            padding: 10px; border-radius: 5px; font-weight: bold;
+            cursor: pointer; width: 100%; margin-top: 5px;
+            font-size: 11px; text-transform: uppercase;
+        }
+        .wipe-btn:hover { background: #e67e22; }
+
+        .logout-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff4d4d;
+            border: 1px solid #ff4d4d;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 11px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background: #ff4d4d;
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.3);
+        }
+
+        .leaflet-control-geocoder {
+            border-radius: 5px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .leaflet-control-geocoder-form input {
+            color: black !important;
+        }
+
+        .map-counter-overlay {
+            background: rgba(2, 38, 73, 0.9); padding: 12px;
+            border: 2px solid #ff4d4d; border-radius: 8px; color: white;
+            min-width: 160px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .map-counter-item { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        .count-val-red { color: #ff4d4d; font-size: 18px; }
+        .count-val-blue { color: #4da3ff; font-size: 18px; }
+        .count-val-yellow { color: #ffcc00; font-size: 18px; }
+
+        .station-list { margin-top: 10px; font-size: 12px; }
+        .station-item { padding: 8px; border-bottom: 1px solid #043a6d; cursor: pointer; }
+        .station-item:hover { background: #043a6d; }
+        
+        .status-select { width: 100%; padding: 5px; margin-top: 5px; background: #fff; color: #000; border: 1px solid #ccc; font-size: 12px; }
+
+        .resolved-incident {
+            filter: grayscale(100%) brightness(0.5);
+            opacity: 0.7;
+            transition: all 0.5s ease;
+        }
+
+        #map { flex-grow: 1; height: 100%; z-index: 1; }
+    
