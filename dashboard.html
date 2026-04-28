@@ -55,13 +55,48 @@ body {
     cursor: pointer; width: 100%; margin-top: 5px; font-size: 11px; text-transform: uppercase;
 }
 .wipe-btn:hover { background: #e67e22; }
-.logout-btn {
-    width: 100%; padding: 10px; background: rgba(255,0,0,0.1);
-    color: #ff4d4d; border: 1px solid #ff4d4d; border-radius: 4px;
+
+/* ── Sidebar action buttons ── */
+.register-btn {
+    width: 100%; padding: 10px; background: rgba(26,140,255,0.12);
+    color: #1a8cff; border: 1px solid #1a8cff; border-radius: 4px;
     font-weight: bold; text-transform: uppercase; font-size: 11px;
     cursor: pointer; letter-spacing: 1px; transition: all 0.3s ease; margin-top: 5px;
 }
-.logout-btn:hover { background: #ff4d4d; color: white; box-shadow: 0 0 15px rgba(255,77,77,0.3); }
+.register-btn:hover { background: #1a8cff; color: white; box-shadow: 0 0 15px rgba(26,140,255,0.3); }
+
+/* ── NEW: Delete User button ── */
+.delete-user-btn {
+    width: 100%; padding: 10px; background: rgba(255,77,77,0.10);
+    color: #ff4d4d; border: 1px solid #ff4d4d; border-radius: 4px;
+    font-weight: bold; text-transform: uppercase; font-size: 11px;
+    cursor: pointer; letter-spacing: 1px; transition: all 0.3s ease; margin-top: 5px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.delete-user-btn:hover { background: #ff4d4d; color: white; box-shadow: 0 0 15px rgba(255,77,77,0.3); }
+
+/* ── NEW: Logout button — prominent, always visible at bottom ── */
+.logout-btn {
+    width: 100%; padding: 11px; background: rgba(255,77,77,0.08);
+    color: #ff4d4d; border: 1px solid rgba(255,77,77,0.5); border-radius: 4px;
+    font-weight: bold; text-transform: uppercase; font-size: 11px;
+    cursor: pointer; letter-spacing: 1px; transition: all 0.25s ease; margin-top: 5px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    position: relative; overflow: hidden;
+}
+.logout-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,77,77,0.08), transparent);
+    transform: translateX(-100%); transition: transform 0.5s ease;
+}
+.logout-btn:hover::before { transform: translateX(100%); }
+.logout-btn:hover {
+    background: #ff4d4d; color: white;
+    border-color: #ff4d4d;
+    box-shadow: 0 0 20px rgba(255,77,77,0.4), 0 0 40px rgba(255,77,77,0.1);
+}
+.logout-icon { font-size: 14px; }
+
 .leaflet-control-geocoder { border-radius: 5px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
 .leaflet-control-geocoder-form input { color: black !important; }
 .map-counter-overlay {
@@ -77,7 +112,6 @@ body {
 .station-item { padding: 8px; border-bottom: 1px solid #043a6d; cursor: pointer; }
 .station-item:hover { background: #043a6d; }
 .status-select { width: 100%; padding: 5px; margin-top: 5px; background: #fff; color: #000; border: 1px solid #ccc; font-size: 12px; }
-/* Unit cards */
 .section-lbl {
     font-size: 10px; letter-spacing: 2px; color: #8b949e;
     text-transform: uppercase; padding: 6px 0 3px;
@@ -101,7 +135,6 @@ body {
 .b-standby    { background: #0f2d1a; color: #27ae60; }
 .b-offline    { background: #1a1a1a; color: #666; }
 .uc-sub  { font-size: 9px; color: #8b949e; margin-top: 3px; }
-/* Blynk status */
 .blynk-bar {
     position: absolute; bottom: 8px; left: 228px;
     background: rgba(2,38,73,0.88); border: 1px solid #043a6d;
@@ -112,7 +145,6 @@ body {
 .blynk-dot.online  { background: #27ae60; box-shadow: 0 0 5px #27ae60; }
 .blynk-dot.offline { background: #ff4d4d; }
 #map { flex-grow: 1; height: 100%; z-index: 1; }
-/* Terminal */
 .terminal-panel {
     position: absolute; bottom: 0; left: 0; right: 0;
     background: #0a0f1a; border-top: 2px solid #1a8cff;
@@ -164,6 +196,219 @@ body {
     cursor: pointer; letter-spacing: 1px; transition: background 0.15s;
 }
 .t-send-btn:hover { background: #1a8cff; color: #fff; }
+
+/* ================================================================
+   REGISTER MODAL
+   ================================================================ */
+.reg-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.82); z-index: 9000;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.reg-overlay.active { display: flex; }
+.reg-modal {
+    background: #011a33; border: 1px solid #1a8cff; border-radius: 12px;
+    padding: 32px 36px; width: 460px; max-width: 95vw;
+    box-shadow: 0 0 60px rgba(26,140,255,0.25), 0 24px 48px rgba(0,0,0,0.6);
+    position: relative; animation: modalIn 0.25s ease;
+}
+@keyframes modalIn {
+    from { transform: translateY(-20px) scale(0.97); opacity: 0; }
+    to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+.reg-modal-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+    border-bottom: 1px solid #1a3a5c; padding-bottom: 16px;
+}
+.reg-modal-icon {
+    width: 42px; height: 42px; background: linear-gradient(135deg,#1a8cff22,#1a8cff44);
+    border: 1px solid #1a8cff; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.reg-modal-title { font-size: 16px; font-weight: 800; letter-spacing: 1px; color: #fff; }
+.reg-modal-sub   { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 2px; margin-top: 2px; }
+.reg-close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; color: #8b949e;
+    font-size: 20px; cursor: pointer; line-height: 1; transition: color 0.2s;
+}
+.reg-close:hover { color: #ff4d4d; }
+.reg-field { margin-bottom: 16px; }
+.reg-label {
+    display: block; font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; color: #8b949e; text-transform: uppercase; margin-bottom: 6px;
+}
+.reg-input, .reg-select {
+    width: 100%; padding: 10px 12px; box-sizing: border-box;
+    background: #020e1c; border: 1px solid #1a3a5c; border-radius: 6px;
+    color: #fff; font-size: 13px; font-family: 'Open Sans', sans-serif;
+    outline: none; transition: border-color 0.2s;
+}
+.reg-input:focus, .reg-select:focus { border-color: #1a8cff; }
+.reg-select option { background: #022649; }
+.reg-row { display: flex; gap: 12px; }
+.reg-row .reg-field { flex: 1; }
+.reg-divider { border: 0; border-top: 1px solid #1a3a5c; margin: 20px 0; }
+.reg-section-lbl {
+    font-size: 10px; letter-spacing: 2px; color: #1a8cff;
+    text-transform: uppercase; margin-bottom: 14px; margin-top: 4px;
+    display: flex; align-items: center; gap: 8px;
+}
+.reg-section-lbl::after { content: ''; flex: 1; height: 1px; background: #1a3a5c; }
+.reg-submit {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #1a3a6c, #1a8cff);
+    color: white; border: none; border-radius: 6px;
+    font-weight: 800; font-size: 13px; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer;
+    transition: all 0.2s; margin-top: 8px;
+    box-shadow: 0 4px 20px rgba(26,140,255,0.3);
+}
+.reg-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(26,140,255,0.45); }
+.reg-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.reg-status {
+    margin-top: 12px; padding: 10px 14px; border-radius: 6px;
+    font-size: 12px; font-weight: 600; display: none; text-align: center;
+}
+.reg-status.ok  { background: #0f2d1a; border: 1px solid #27ae60; color: #27ae60; display: block; }
+.reg-status.err { background: #2d0f0f; border: 1px solid #ff4d4d; color: #ff4d4d; display: block; }
+.reg-token-display {
+    background: #020e1c; border: 1px solid #1a3a5c; border-radius: 6px;
+    padding: 10px 12px; font-family: 'Courier New', monospace; font-size: 11px;
+    color: #ffcc00; word-break: break-all; margin-top: 8px; display: none; line-height: 1.6;
+}
+.reg-pw-wrapper { position: relative; }
+.reg-pw-toggle {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: #8b949e; cursor: pointer; font-size: 13px;
+    padding: 0; line-height: 1;
+}
+.reg-pw-toggle:hover { color: #1a8cff; }
+
+/* ================================================================
+   DELETE USER MODAL  (NEW)
+   ================================================================ */
+.del-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.88); z-index: 9100;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(6px);
+}
+.del-overlay.active { display: flex; }
+.del-modal {
+    background: #0d0505; border: 1px solid #ff4d4d; border-radius: 12px;
+    padding: 30px 34px; width: 500px; max-width: 95vw; max-height: 85vh;
+    box-shadow: 0 0 60px rgba(255,77,77,0.2), 0 24px 48px rgba(0,0,0,0.7);
+    position: relative; animation: modalIn 0.25s ease;
+    display: flex; flex-direction: column;
+}
+.del-modal-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    border-bottom: 1px solid #3a1a1a; padding-bottom: 16px; flex-shrink: 0;
+}
+.del-modal-icon {
+    width: 42px; height: 42px; background: linear-gradient(135deg,#ff4d4d22,#ff4d4d44);
+    border: 1px solid #ff4d4d; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.del-modal-title { font-size: 16px; font-weight: 800; letter-spacing: 1px; color: #fff; }
+.del-modal-sub   { font-size: 10px; color: #8b4444; text-transform: uppercase; letter-spacing: 2px; margin-top: 2px; }
+.del-close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; color: #8b949e;
+    font-size: 20px; cursor: pointer; line-height: 1; transition: color 0.2s;
+}
+.del-close:hover { color: #ff4d4d; }
+/* Search bar */
+.del-search {
+    width: 100%; padding: 9px 12px; box-sizing: border-box;
+    background: #1a0808; border: 1px solid #3a1a1a; border-radius: 6px;
+    color: #fff; font-size: 12px; font-family: 'Open Sans', sans-serif;
+    outline: none; margin-bottom: 12px; flex-shrink: 0;
+    transition: border-color 0.2s;
+}
+.del-search:focus { border-color: #ff4d4d; }
+.del-search::placeholder { color: #5a3333; }
+/* User list */
+.del-user-list {
+    flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+    min-height: 0;
+}
+.del-user-list::-webkit-scrollbar { width: 4px; }
+.del-user-list::-webkit-scrollbar-track { background: #0d0505; }
+.del-user-list::-webkit-scrollbar-thumb { background: #3a1a1a; border-radius: 2px; }
+.del-user-card {
+    background: #1a0808; border: 1px solid #3a1a1a; border-radius: 6px;
+    padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+    transition: border-color 0.2s;
+}
+.del-user-card:hover { border-color: #ff4d4d55; }
+.del-user-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg,#2d0f0f,#5a1a1a);
+    border: 1px solid #ff4d4d55;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+}
+.del-user-info { flex: 1; min-width: 0; }
+.del-user-name { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.del-user-email { font-size: 10px; color: #8b4444; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.del-user-meta { font-size: 9px; color: #6b6b6b; margin-top: 3px; }
+.del-unit-badge {
+    font-size: 9px; font-weight: bold; padding: 2px 7px; border-radius: 10px;
+    background: #2d0f0f; color: #ff4d4d; border: 1px solid #ff4d4d44;
+    white-space: nowrap; flex-shrink: 0;
+}
+.del-btn {
+    background: none; border: 1px solid #ff4d4d44; color: #ff4d4d;
+    border-radius: 5px; padding: 6px 12px; font-size: 11px; font-weight: bold;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+    letter-spacing: 0.5px;
+}
+.del-btn:hover { background: #ff4d4d; color: white; border-color: #ff4d4d; box-shadow: 0 0 12px rgba(255,77,77,0.4); }
+/* States */
+.del-loading { text-align: center; padding: 40px 0; color: #8b4444; font-size: 13px; }
+.del-empty   { text-align: center; padding: 40px 0; color: #5a3333; font-size: 13px; }
+.del-footer { flex-shrink: 0; margin-top: 14px; border-top: 1px solid #3a1a1a; padding-top: 14px; }
+.del-footer-status {
+    padding: 9px 14px; border-radius: 6px; font-size: 12px;
+    font-weight: 600; text-align: center; display: none;
+}
+.del-footer-status.ok  { background: #0f2d1a; border: 1px solid #27ae60; color: #27ae60; display: block; }
+.del-footer-status.err { background: #2d0f0f; border: 1px solid #ff4d4d; color: #ff4d4d; display: block; }
+/* Confirm dialog inside delete modal */
+.del-confirm-box {
+    display: none; background: #200808; border: 1px solid #ff4d4d;
+    border-radius: 8px; padding: 16px; margin-top: 12px; flex-shrink: 0;
+}
+.del-confirm-box.active { display: block; }
+.del-confirm-text { font-size: 13px; color: #ffcccc; margin-bottom: 12px; line-height: 1.5; }
+.del-confirm-text b { color: #ff4d4d; }
+.del-confirm-row { display: flex; gap: 8px; }
+.del-confirm-yes {
+    flex: 1; padding: 9px; background: #ff4d4d; color: white; border: none;
+    border-radius: 5px; font-weight: 800; font-size: 12px; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s;
+}
+.del-confirm-yes:hover { background: #cc0000; }
+.del-confirm-yes:disabled { opacity: 0.5; cursor: not-allowed; }
+.del-confirm-no {
+    flex: 1; padding: 9px; background: none; color: #8b949e;
+    border: 1px solid #3a1a1a; border-radius: 5px;
+    font-weight: 700; font-size: 12px; cursor: pointer;
+    text-transform: uppercase; transition: all 0.2s;
+}
+.del-confirm-no:hover { border-color: #8b949e; color: #fff; }
+
+/* Warning banner */
+.del-warning {
+    background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.3);
+    border-radius: 6px; padding: 10px 14px; margin-bottom: 14px;
+    font-size: 11px; color: #ff9999; line-height: 1.5; flex-shrink: 0;
+    display: flex; gap: 8px; align-items: flex-start;
+}
+.del-warning-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
 </style>
 </head>
 <body>
@@ -219,8 +464,16 @@ onAuthStateChanged(auth, user => { if (!user) window.location.href = 'login.html
 
         <button class="excel-btn" onclick="exportToExcel()">&#128203; Export EOD Report</button>
         <button class="wipe-btn"  onclick="wipeMapAndExport()">&#128247; Wipe Map &amp; Export</button>
-         <button class="register-btn" onclick="openRegisterModal()">&#43; Register Emergency Vehicle</button>
-        <button class="logout-btn" id="logout-trigger">&#x2715; Terminate Session</button>
+
+        <!-- Admin actions -->
+        <div class="section-lbl">&#9632; Admin Actions</div>
+        <button class="register-btn" onclick="openRegisterModal()">&#43; Register Emergency Vehicle</button>
+        <button class="delete-user-btn" onclick="openDeleteUserModal()">&#128465; Delete User Account</button>
+
+        <!-- Logout — prominent, at the bottom -->
+        <button class="logout-btn" id="logout-trigger">
+            <span class="logout-icon">&#x23FB;</span> Logout
+        </button>
 
         <div class="section-lbl">Fire Stations</div>
         <div class="station-list" id="station-container"></div>
@@ -255,6 +508,115 @@ onAuthStateChanged(auth, user => { if (!user) window.location.href = 'login.html
     </div>
 </div>
 
+<!-- ================================================================
+     DELETE USER ACCOUNT MODAL
+     ================================================================ -->
+<div class="del-overlay" id="del-overlay" onclick="if(event.target===this)closeDeleteUserModal()">
+    <div class="del-modal">
+        <button class="del-close" onclick="closeDeleteUserModal()">&#x2715;</button>
+
+        <div class="del-modal-header">
+            <div class="del-modal-icon">&#128465;</div>
+            <div>
+                <div class="del-modal-title">Delete User Account</div>
+                <div class="del-modal-sub">T.U.L.O.N.G. Account Management</div>
+            </div>
+        </div>
+
+        <div class="del-warning">
+            <span class="del-warning-icon">&#9888;</span>
+            <span>Deleting an account removes the user from Firestore. The Firebase Auth account will be deactivated on their next login attempt. This action cannot be undone.</span>
+        </div>
+
+        <input class="del-search" id="del-search-input" type="text" placeholder="&#128269; Search by name, email, or unit ID..." oninput="filterDelUsers()"/>
+
+        <div class="del-user-list" id="del-user-list">
+            <div class="del-loading">&#8987; Loading registered users...</div>
+        </div>
+
+        <div class="del-footer">
+            <!-- Confirm box appears here when admin taps Delete on a user -->
+            <div class="del-confirm-box" id="del-confirm-box">
+                <div class="del-confirm-text" id="del-confirm-text">
+                    Confirm deletion of <b id="del-confirm-name"></b>?
+                </div>
+                <div class="del-confirm-row">
+                    <button class="del-confirm-yes" id="del-confirm-yes-btn" onclick="confirmDeleteUser()">&#9888; YES, DELETE</button>
+                    <button class="del-confirm-no" onclick="cancelDeleteConfirm()">Cancel</button>
+                </div>
+            </div>
+            <div class="del-footer-status" id="del-footer-status"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================
+     REGISTER EMERGENCY VEHICLE MODAL
+     ================================================================ -->
+<div class="reg-overlay" id="reg-overlay" onclick="if(event.target===this)closeRegisterModal()">
+    <div class="reg-modal">
+        <button class="reg-close" onclick="closeRegisterModal()">&#x2715;</button>
+        <div class="reg-modal-header">
+            <div class="reg-modal-icon">&#128680;</div>
+            <div>
+                <div class="reg-modal-title">Register Emergency Vehicle</div>
+                <div class="reg-modal-sub">T.U.L.O.N.G. Unit Enrollment</div>
+            </div>
+        </div>
+        <div class="reg-section-lbl">Vehicle Information</div>
+        <div class="reg-row">
+            <div class="reg-field">
+                <label class="reg-label">Unit ID</label>
+                <input class="reg-input" id="reg-unit-id" type="text" placeholder="e.g. A-004" maxlength="10"/>
+            </div>
+            <div class="reg-field">
+                <label class="reg-label">Vehicle Type</label>
+                <select class="reg-select" id="reg-vtype">
+                    <option value="ambulance">&#128657; Ambulance</option>
+                    <option value="firetruck">&#128658; Firetruck</option>
+                </select>
+            </div>
+        </div>
+        <div class="reg-field">
+            <label class="reg-label">Plate Number</label>
+            <input class="reg-input" id="reg-plate" type="text" placeholder="e.g. XYZ 1234" maxlength="12"/>
+        </div>
+        <div class="reg-field">
+            <label class="reg-label">Station / Agency</label>
+            <input class="reg-input" id="reg-station" type="text" placeholder="e.g. Cebu City Fire Station"/>
+        </div>
+        <div class="reg-field">
+            <label class="reg-label">Blynk Token (ESP32)</label>
+            <input class="reg-input" id="reg-token" type="text" placeholder="Paste Blynk device token here"/>
+        </div>
+        <hr class="reg-divider"/>
+        <div class="reg-section-lbl">Driver / Operator Account (User Dashboard Login)</div>
+        <div class="reg-field">
+            <label class="reg-label">Full Name</label>
+            <input class="reg-input" id="reg-name" type="text" placeholder="e.g. Juan Dela Cruz"/>
+        </div>
+        <div class="reg-field">
+            <label class="reg-label">Email Address</label>
+            <input class="reg-input" id="reg-email" type="email" placeholder="operator@email.com"/>
+        </div>
+        <div class="reg-field">
+            <label class="reg-label">Password</label>
+            <div class="reg-pw-wrapper">
+                <input class="reg-input" id="reg-password" type="password" placeholder="Min 6 characters" style="padding-right:36px;"/>
+                <button class="reg-pw-toggle" onclick="toggleRegPw()" id="reg-pw-eye">&#128065;</button>
+            </div>
+        </div>
+        <button class="reg-submit" id="reg-submit-btn" onclick="submitRegistration()">
+            &#43; REGISTER UNIT &amp; CREATE ACCOUNT
+        </button>
+        <div class="reg-status" id="reg-status"></div>
+        <div class="reg-token-display" id="reg-token-display"></div>
+    </div>
+</div>
+
+<!-- ================================================================
+     MAIN SCRIPTS (map, blynk, incidents, terminal)
+     ================================================================ -->
 <script>
 // ============================================================
 // BLYNK CONFIG
@@ -268,7 +630,7 @@ const UNITS = [
 const V_STANDBY=4, V_RESPONDING=5, V_ARRIVED=6, V_LOCATION=7;
 
 // ============================================================
-// MAP INIT — Light tile (no dark mode)
+// MAP INIT
 // ============================================================
 const map = L.map('map').setView([10.3157, 123.8854], 13);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -289,8 +651,8 @@ L.Control.geocoder({
     } else alert("Search result is outside the T.U.L.O.N.G. coverage area.");
 }).addTo(map);
 
-const fireIcon      = L.icon({ iconUrl:"fireStation1.png",      iconSize:[30,30] });
-const volunteerIcon = L.icon({ iconUrl:"volunteerStation1.png",  iconSize:[30,30] });
+const fireIcon      = L.icon({ iconUrl:"fireStation1.png",     iconSize:[30,30] });
+const volunteerIcon = L.icon({ iconUrl:"volunteerStation1.png", iconSize:[30,30] });
 
 // ============================================================
 // INCIDENT SYSTEM
@@ -506,13 +868,12 @@ x0.forEach(s => {
 });
 
 // ============================================================
-// BLYNK ESP32 — unit marker colors: STANDBY=green, ARRIVED=red, RESPONDING=orange
+// BLYNK ESP32
 // ============================================================
 let unitStates={}, unitMarkers={};
-const prevButtonStates={}; // track previous button states to detect changes
+const prevButtonStates={};
 
 async function fetchUnit(unit) {
-    // Skip placeholder tokens entirely — treat as offline without hitting API
     if (!unit.token || unit.token.includes('TOKEN_') || unit.token.length < 20) {
         const prev = prevButtonStates[unit.id] || {online: null};
         if (prev.online !== false) {
@@ -527,34 +888,22 @@ async function fetchUnit(unit) {
 
     function markOffline() {
         const prev = prevButtonStates[unit.id] || {};
-        // Only announce once — when transitioning from online/unknown to offline
         if (prev.online !== false) {
             termLog('err', `${unitLabel} is now <b>OFFLINE</b>`);
             if (!terminalOpen) toggleTerminal();
         }
         prevButtonStates[unit.id] = {...prev, online: false};
         unitStates[unit.id] = {...(unitStates[unit.id]||{}), online: false};
-        if (unitMarkers[unit.id]) {
-            map.removeLayer(unitMarkers[unit.id]);
-            delete unitMarkers[unit.id];
-        }
+        if (unitMarkers[unit.id]) { map.removeLayer(unitMarkers[unit.id]); delete unitMarkers[unit.id]; }
     }
 
     try {
-        // Step 1: Check if hardware is ACTUALLY connected right now
         const connRes = await fetch(`${BLYNK_BASE}/isHardwareConnected?token=${unit.token}`);
         if (!connRes.ok) { markOffline(); return false; }
         const connText = await connRes.text();
         if (connText.toLowerCase().includes('invalid')) { markOffline(); return false; }
-        const isConnected = connText.trim() === 'true';
+        if (connText.trim() !== 'true') { markOffline(); return false; }
 
-        if (!isConnected) {
-            // Device is definitively offline — mark it and stop
-            markOffline();
-            return false;
-        }
-
-        // Step 2: Device confirmed ONLINE — fetch pin values
         const res = await fetch(`${BLYNK_BASE}/get?token=${unit.token}&v${V_STANDBY}&v${V_RESPONDING}&v${V_ARRIVED}&v${V_LOCATION}`);
         if (!res.ok) { markOffline(); return false; }
         const text = await res.text();
@@ -573,20 +922,12 @@ async function fetchUnit(unit) {
             if (lat<4||lat>21||lon<116||lon>127) { [lat,lon]=[lon,lat]; if(lat<4||lat>21||lon<116||lon>127){lat=null;lon=null;} }
         }
 
-        // Step 3: Compare with previous state and log changes
         const prev = prevButtonStates[unit.id] || {standby:null, responding:null, arrived:null, online:null};
-
-        // Announce ONLINE — triggers on first boot (null) or reconnect (false)
         if (prev.online !== true) {
-            if (prev.online === null) {
-                termLog('ok', `${unitLabel} is now <b>ONLINE</b>`);
-            } else {
-                termLog('ok', `${unitLabel} reconnected &mdash; is now <b>ONLINE</b>`);
-            }
+            if (prev.online === null) termLog('ok', `${unitLabel} is now <b>ONLINE</b>`);
+            else termLog('ok', `${unitLabel} reconnected &mdash; is now <b>ONLINE</b>`);
             if (!terminalOpen) toggleTerminal();
         }
-
-        // Log button presses (only on rising edge: OFF → ON)
         if (standby    && prev.standby    !== standby)    termLog('recv', `[${unit.id}] 🟢 &mdash; <b>STANDBY</b>`);
         if (responding && prev.responding !== responding) termLog('recv', `[${unit.id}] 🟠 &mdash; <b>RESPONDING</b>`);
         if (arrived    && prev.arrived    !== arrived)    termLog('recv', `[${unit.id}] 🔴 &mdash; <b>ARRIVED</b>`);
@@ -595,21 +936,13 @@ async function fetchUnit(unit) {
         unitStates[unit.id] = {standby, responding, arrived, lat, lon, type: unit.type, online: true};
         if (lat&&lon) updateUnitMarker(unit.id, unitStates[unit.id]);
         return true;
-
-    } catch(e) {
-        // Network error or unexpected failure — treat as offline
-        markOffline();
-        return false;
-    }
+    } catch(e) { markOffline(); return false; }
 }
 
 function updateUnitMarker(id, s) {
-    // STANDBY = green (#27ae60), ARRIVED = red (#ff4d4d), RESPONDING = orange (#f0883e)
-    const color      = s.responding ? '#f0883e' : s.arrived ? '#ff4d4d' : '#27ae60';
-    const lbl        = s.responding ? 'RESPONDING' : s.arrived ? 'ARRIVED' : 'STANDBY';
-    const img        = s.type==='firetruck' ? 'firetruck.png' : 'AMBULANCE.png';
-    const sz         = s.type==='firetruck' ? 25 : 35;
-    // Vehicle type pin: FIRETRUCK = red pin, AMBULANCE = blue pin
+    const color  = s.responding ? '#f0883e' : s.arrived ? '#ff4d4d' : '#27ae60';
+    const lbl    = s.responding ? 'RESPONDING' : s.arrived ? 'ARRIVED' : 'STANDBY';
+    const img    = s.type==='firetruck' ? 'firetruck.png' : 'AMBULANCE.png';
     const pinColor = s.type==='firetruck' ? '#ff4d4d' : '#1a8cff';
     const icon  = L.divIcon({className:'', iconSize:[44,70], iconAnchor:[22,70],
         html:`<div style="text-align:center;width:44px;"><svg width="44" height="56" viewBox="0 0 44 56" xmlns="http://www.w3.org/2000/svg" style="display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.5));"><path d="M22 0 C10 0 0 10 0 22 C0 36 22 56 22 56 C22 56 44 36 44 22 C44 10 34 0 22 0 Z" fill="${pinColor}"/><circle cx="22" cy="21" r="16" fill="white"/><image href="${img}" x="6" y="5" width="32" height="32"/></svg><div style="background:${color};color:#fff;font-size:8px;font-weight:bold;padding:1px 5px;border-radius:3px;white-space:nowrap;margin-top:2px;display:inline-block;box-shadow:0 1px 4px rgba(0,0,0,0.4);">${id}</div></div>`});
@@ -639,7 +972,6 @@ function renderUnitList() {
 
 function updateOverlayCounts() {
     const st=Object.values(unitStates);
-    // Count ALL online units regardless of button state
     const trucks=st.filter(s=>s.online&&s.type==='firetruck').length;
     const ambs  =st.filter(s=>s.online&&s.type==='ambulance').length;
     document.getElementById('active-vehicles').innerText=trucks+ambs;
@@ -660,7 +992,9 @@ async function pollAll() {
 // ============================================================
 document.getElementById('logout-trigger').addEventListener('click', function() {
     if (confirm("CONFIRM SYSTEM LOGOUT?\nPLEASE DOWNLOAD EOD REPORT FIRST")) {
-        window.firebaseSignOut&&window.firebaseSignOut().then(()=>{ window.location.href='login.html'; }).catch(e=>console.error(e));
+        window.firebaseSignOut && window.firebaseSignOut()
+            .then(() => { window.location.href = 'login.html'; })
+            .catch(e => console.error(e));
     }
 });
 
@@ -703,14 +1037,9 @@ async function sendToUnit(unit, message) {
     try {
         const url = `${BLYNK_BASE}/update?token=${unit.token}&v${V_TERMINAL}=${encodeURIComponent(message)}`;
         const res = await fetch(url);
-        if (res.ok) {
-            termLog('ok', `[${unit.id}] &rarr; "${message}" sent OK`);
-        } else {
-            termLog('err', `[${unit.id}] HTTP ${res.status} — failed`);
-        }
-    } catch(e) {
-        termLog('err', `[${unit.id}] Network error: ${e.message}`);
-    }
+        if (res.ok) termLog('ok', `[${unit.id}] &rarr; "${message}" sent OK`);
+        else termLog('err', `[${unit.id}] HTTP ${res.status} — failed`);
+    } catch(e) { termLog('err', `[${unit.id}] Network error: ${e.message}`); }
 }
 
 async function terminalSend() {
@@ -719,59 +1048,37 @@ async function terminalSend() {
     const msg    = input.value.trim();
     if (!msg) return;
     input.value = '';
-
     const targets = target === 'ALL' ? UNITS : UNITS.filter(u => u.id === target);
     if (targets.length === 0) { termLog('err', 'No matching unit found.'); return; }
-
     termLog('send', `To <b>${target}</b>: "${msg}"`);
-    for (const unit of targets) {
-        await sendToUnit(unit, msg);
-    }
+    for (const unit of targets) { await sendToUnit(unit, msg); }
 }
 
-// populate target dropdown whenever UNITS is defined
 (function populateTargetSelect() {
     const sel = document.getElementById('t-target');
     UNITS.forEach(u => {
         const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = `${u.id} (${u.type})`;
-        sel.appendChild(opt);
+        opt.value = u.id; opt.textContent = `${u.id} (${u.type})`; sel.appendChild(opt);
     });
 })();
 
-// Enter key support
 document.getElementById('t-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') terminalSend();
 });
 
-// ============================================================
-// TERMINAL RX — uses /data/get history so NO messages are missed
-// ============================================================
-// Track the timestamp of the last message we already logged per unit
+// TERMINAL RX
 const lastSeenTs = {};
-
 async function pollTerminalRx() {
     for (const unit of UNITS) {
         try {
-            // Fetch last 10 datapoints from V3 history for this unit
             const url = `${BLYNK_BASE}/data/get?token=${unit.token}&pin=v${V_TERMINAL}&limit=10&order=DESC`;
             const res = await fetch(url);
             if (!res.ok) continue;
-            const rows = await res.json(); // array of {ts, value} newest first
+            const rows = await res.json();
             if (!Array.isArray(rows) || rows.length === 0) continue;
-
-            // Initialise cursor on very first poll so we dont replay old history
-            if (lastSeenTs[unit.id] === undefined) {
-                lastSeenTs[unit.id] = rows[0].ts;
-                continue;
-            }
-
-            // Collect only rows newer than what we have already shown
+            if (lastSeenTs[unit.id] === undefined) { lastSeenTs[unit.id] = rows[0].ts; continue; }
             const newRows = rows.filter(r => r.ts > lastSeenTs[unit.id]);
             if (newRows.length === 0) continue;
-
-            // Log oldest-first so messages appear in chronological order
             newRows.reverse().forEach(r => {
                 let msg = Array.isArray(r.value) ? r.value[0] : r.value;
                 if (typeof msg !== 'string') msg = String(msg ?? '');
@@ -779,227 +1086,22 @@ async function pollTerminalRx() {
                 if (!msg || msg === '0') return;
                 termLog('recv', `[${unit.id}] ${msg}`);
             });
-
-            // Advance cursor to the newest row we just processed
             lastSeenTs[unit.id] = rows[0].ts;
-
-            // Auto-expand terminal when a new message arrives
-            if (!terminalOpen) {
-                toggleTerminal();
-                termLog('sys', '— New message received, terminal opened —');
-            }
-
-        } catch(e) { /* silent — unit may be offline or token invalid */ }
+            if (!terminalOpen) { toggleTerminal(); termLog('sys', '— New message received, terminal opened —'); }
+        } catch(e) { /* silent */ }
     }
 }
-
-// Poll RX every 2 seconds for near-real-time feel
 setInterval(pollTerminalRx, 2000);
-// Run once immediately after a short delay (let UNITS and terminal init first)
 setTimeout(pollTerminalRx, 1500);
 </script>
-<!-- REGISTER EMERGENCY VEHICLE MODAL — insert before </body> in main dashboard -->
 
-<!-- Register Button (add after logout-btn in sidebar) -->
-<!-- <button class="register-btn" onclick="openRegisterModal()">&#43; Register Emergency Vehicle</button> -->
-
-<style>
-.register-btn {
-    width: 100%; padding: 10px; background: rgba(26,140,255,0.12);
-    color: #1a8cff; border: 1px solid #1a8cff; border-radius: 4px;
-    font-weight: bold; text-transform: uppercase; font-size: 11px;
-    cursor: pointer; letter-spacing: 1px; transition: all 0.3s ease; margin-top: 5px;
-}
-.register-btn:hover { background: #1a8cff; color: white; box-shadow: 0 0 15px rgba(26,140,255,0.3); }
-
-/* ── Modal overlay ── */
-.reg-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.82); z-index: 9000;
-    align-items: center; justify-content: center;
-    backdrop-filter: blur(4px);
-}
-.reg-overlay.active { display: flex; }
-
-.reg-modal {
-    background: #011a33;
-    border: 1px solid #1a8cff;
-    border-radius: 12px;
-    padding: 32px 36px;
-    width: 460px;
-    max-width: 95vw;
-    box-shadow: 0 0 60px rgba(26,140,255,0.25), 0 24px 48px rgba(0,0,0,0.6);
-    position: relative;
-    animation: modalIn 0.25s ease;
-}
-@keyframes modalIn {
-    from { transform: translateY(-20px) scale(0.97); opacity: 0; }
-    to   { transform: translateY(0) scale(1); opacity: 1; }
-}
-
-.reg-modal-header {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
-    border-bottom: 1px solid #1a3a5c; padding-bottom: 16px;
-}
-.reg-modal-icon {
-    width: 42px; height: 42px; background: linear-gradient(135deg,#1a8cff22,#1a8cff44);
-    border: 1px solid #1a8cff; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center; font-size: 20px;
-}
-.reg-modal-title { font-size: 16px; font-weight: 800; letter-spacing: 1px; color: #fff; }
-.reg-modal-sub   { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 2px; margin-top: 2px; }
-
-.reg-close {
-    position: absolute; top: 14px; right: 16px;
-    background: none; border: none; color: #8b949e;
-    font-size: 20px; cursor: pointer; line-height: 1;
-    transition: color 0.2s;
-}
-.reg-close:hover { color: #ff4d4d; }
-
-.reg-field { margin-bottom: 16px; }
-.reg-label {
-    display: block; font-size: 10px; font-weight: 700;
-    letter-spacing: 2px; color: #8b949e; text-transform: uppercase; margin-bottom: 6px;
-}
-.reg-input, .reg-select {
-    width: 100%; padding: 10px 12px; box-sizing: border-box;
-    background: #020e1c; border: 1px solid #1a3a5c; border-radius: 6px;
-    color: #fff; font-size: 13px; font-family: 'Open Sans', sans-serif;
-    outline: none; transition: border-color 0.2s;
-}
-.reg-input:focus, .reg-select:focus { border-color: #1a8cff; }
-.reg-select option { background: #022649; }
-
-.reg-row { display: flex; gap: 12px; }
-.reg-row .reg-field { flex: 1; }
-
-.reg-divider {
-    border: 0; border-top: 1px solid #1a3a5c; margin: 20px 0;
-}
-
-.reg-section-lbl {
-    font-size: 10px; letter-spacing: 2px; color: #1a8cff;
-    text-transform: uppercase; margin-bottom: 14px; margin-top: 4px;
-    display: flex; align-items: center; gap: 8px;
-}
-.reg-section-lbl::after {
-    content: ''; flex: 1; height: 1px; background: #1a3a5c;
-}
-
-.reg-submit {
-    width: 100%; padding: 13px;
-    background: linear-gradient(135deg, #1a3a6c, #1a8cff);
-    color: white; border: none; border-radius: 6px;
-    font-weight: 800; font-size: 13px; letter-spacing: 2px;
-    text-transform: uppercase; cursor: pointer;
-    transition: all 0.2s; margin-top: 8px;
-    box-shadow: 0 4px 20px rgba(26,140,255,0.3);
-}
-.reg-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(26,140,255,0.45); }
-.reg-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-.reg-status {
-    margin-top: 12px; padding: 10px 14px; border-radius: 6px;
-    font-size: 12px; font-weight: 600; display: none; text-align: center;
-}
-.reg-status.ok  { background: #0f2d1a; border: 1px solid #27ae60; color: #27ae60; display: block; }
-.reg-status.err { background: #2d0f0f; border: 1px solid #ff4d4d; color: #ff4d4d; display: block; }
-
-.reg-token-display {
-    background: #020e1c; border: 1px solid #1a3a5c; border-radius: 6px;
-    padding: 10px 12px; font-family: 'Courier New', monospace; font-size: 11px;
-    color: #ffcc00; word-break: break-all; margin-top: 8px; display: none;
-    line-height: 1.6;
-}
-
-.reg-pw-wrapper { position: relative; }
-.reg-pw-toggle {
-    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; color: #8b949e; cursor: pointer; font-size: 13px;
-    padding: 0; line-height: 1;
-}
-.reg-pw-toggle:hover { color: #1a8cff; }
-</style>
-
-<!-- Modal HTML -->
-<div class="reg-overlay" id="reg-overlay" onclick="if(event.target===this)closeRegisterModal()">
-    <div class="reg-modal">
-        <button class="reg-close" onclick="closeRegisterModal()">&#x2715;</button>
-
-        <div class="reg-modal-header">
-            <div class="reg-modal-icon">🚨</div>
-            <div>
-                <div class="reg-modal-title">Register Emergency Vehicle</div>
-                <div class="reg-modal-sub">T.U.L.O.N.G. Unit Enrollment</div>
-            </div>
-        </div>
-
-        <div class="reg-section-lbl">Vehicle Information</div>
-
-        <div class="reg-row">
-            <div class="reg-field">
-                <label class="reg-label">Unit ID</label>
-                <input class="reg-input" id="reg-unit-id" type="text" placeholder="e.g. A-004" maxlength="10"/>
-            </div>
-            <div class="reg-field">
-                <label class="reg-label">Vehicle Type</label>
-                <select class="reg-select" id="reg-vtype">
-                    <option value="ambulance">🚑 Ambulance</option>
-                    <option value="firetruck">🚒 Firetruck</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="reg-field">
-            <label class="reg-label">Plate Number</label>
-            <input class="reg-input" id="reg-plate" type="text" placeholder="e.g. XYZ 1234" maxlength="12"/>
-        </div>
-
-        <div class="reg-field">
-            <label class="reg-label">Station / Agency</label>
-            <input class="reg-input" id="reg-station" type="text" placeholder="e.g. Cebu City Fire Station"/>
-        </div>
-
-        <div class="reg-field">
-            <label class="reg-label">Blynk Token (ESP32)</label>
-            <input class="reg-input" id="reg-token" type="text" placeholder="Paste Blynk device token here"/>
-        </div>
-
-        <hr class="reg-divider"/>
-        <div class="reg-section-lbl">Driver / Operator Account (User Dashboard Login)</div>
-
-        <div class="reg-field">
-            <label class="reg-label">Full Name</label>
-            <input class="reg-input" id="reg-name" type="text" placeholder="e.g. Juan Dela Cruz"/>
-        </div>
-
-        <div class="reg-field">
-            <label class="reg-label">Email Address</label>
-            <input class="reg-input" id="reg-email" type="email" placeholder="operator@email.com"/>
-        </div>
-
-        <div class="reg-field">
-            <label class="reg-label">Password</label>
-            <div class="reg-pw-wrapper">
-                <input class="reg-input" id="reg-password" type="password" placeholder="Min 6 characters" style="padding-right:36px;"/>
-                <button class="reg-pw-toggle" onclick="toggleRegPw()" id="reg-pw-eye">👁</button>
-            </div>
-        </div>
-
-        <button class="reg-submit" id="reg-submit-btn" onclick="submitRegistration()">
-            &#43; REGISTER UNIT &amp; CREATE ACCOUNT
-        </button>
-        <div class="reg-status" id="reg-status"></div>
-        <div class="reg-token-display" id="reg-token-display"></div>
-    </div>
-</div>
-
+<!-- ================================================================
+     FIREBASE MODULE — Register + Delete User
+     ================================================================ -->
 <script type="module">
-// Firebase imports for registration
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDtYoKpqYE8MDc1dbZANQWwLxpp-heTBr8",
@@ -1010,11 +1112,11 @@ const firebaseConfig = {
     appId: "1:924023247315:web:45f4d22dc0e6c8436f1f26"
 };
 
-// Reuse existing app if already initialized
 const app  = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
+// ── REGISTER ──────────────────────────────────────────────────
 window.openRegisterModal  = () => { document.getElementById('reg-overlay').classList.add('active'); clearRegForm(); };
 window.closeRegisterModal = () => document.getElementById('reg-overlay').classList.remove('active');
 window.toggleRegPw = () => {
@@ -1030,6 +1132,8 @@ function clearRegForm() {
     st.className='reg-status'; st.textContent='';
     document.getElementById('reg-token-display').style.display='none';
     document.getElementById('reg-submit-btn').disabled=false;
+    document.getElementById('reg-submit-btn').textContent='+ REGISTER UNIT & CREATE ACCOUNT';
+    document.getElementById('reg-submit-btn').style.background='';
 }
 
 function regStatus(type, msg) {
@@ -1048,41 +1152,25 @@ window.submitRegistration = async function() {
     const email    = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
 
-    if (!unitId||!plate||!station||!name||!email||!password) {
-        regStatus('err','⚠ Please fill in all required fields.'); return;
-    }
+    if (!unitId||!plate||!station||!name||!email||!password) { regStatus('err','⚠ Please fill in all required fields.'); return; }
     if (password.length < 6) { regStatus('err','⚠ Password must be at least 6 characters.'); return; }
 
     const btn = document.getElementById('reg-submit-btn');
-    btn.disabled = true;
-    regStatus('', '');
+    btn.disabled = true; regStatus('', '');
 
     try {
-        // Create Firebase Auth account
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(cred.user, { displayName: name });
-
-        // Save vehicle + user metadata in Firestore
         await setDoc(doc(db, 'vehicles', unitId), {
-            unitId, type: vtype, plate, station,
-            blynkToken: token || '',
-            operatorName: name, operatorEmail: email,
-            uid: cred.user.uid,
-            registeredAt: new Date().toISOString(),
-            role: 'operator'
+            unitId, type: vtype, plate, station, blynkToken: token || '',
+            operatorName: name, operatorEmail: email, uid: cred.user.uid,
+            registeredAt: new Date().toISOString(), role: 'operator'
         });
-
-        // Save user profile doc
         await setDoc(doc(db, 'users', cred.user.uid), {
-            name, email, role: 'operator',
-            unitId, vehicleType: vtype, station,
+            name, email, role: 'operator', unitId, vehicleType: vtype, station,
             createdAt: new Date().toISOString()
         });
-
-        // Show success
         regStatus('ok', `✓ Unit ${unitId} registered! Account created for ${email}`);
-
-        // Show login credentials summary
         const td = document.getElementById('reg-token-display');
         td.style.display = 'block';
         td.innerHTML = `
@@ -1091,22 +1179,152 @@ window.submitRegistration = async function() {
             📧 Email: <span style="color:#fff;">${email}</span><br>
             🔑 Password: <span style="color:#fff;">${password}</span><br>
             🚗 Unit: <span style="color:#fff;">${unitId} — ${vtype === 'firetruck' ? '🚒 Firetruck' : '🚑 Ambulance'}</span><br>
-            🏥 Station: <span style="color:#fff;">${station}</span>
-        `;
-
+            🏥 Station: <span style="color:#fff;">${station}</span>`;
         btn.textContent = '✓ REGISTERED';
         btn.style.background = 'linear-gradient(135deg,#0f2d1a,#27ae60)';
-
     } catch (err) {
         btn.disabled = false;
-        const msgs = {
-            'auth/email-already-in-use': '⚠ This email is already registered.',
-            'auth/invalid-email':        '⚠ Invalid email address.',
-            'auth/weak-password':        '⚠ Password is too weak.',
-        };
+        const msgs = { 'auth/email-already-in-use': '⚠ This email is already registered.', 'auth/invalid-email': '⚠ Invalid email address.', 'auth/weak-password': '⚠ Password is too weak.' };
         regStatus('err', msgs[err.code] || `⚠ Error: ${err.message}`);
     }
 };
+
+// ── DELETE USER ───────────────────────────────────────────────
+let allUsersCache = [];       // full list from Firestore
+let pendingDeleteUid  = null; // uid of user selected for deletion
+let pendingDeleteUnitId = null;
+let pendingDeleteName = null;
+
+window.openDeleteUserModal = async function() {
+    document.getElementById('del-overlay').classList.add('active');
+    document.getElementById('del-search-input').value = '';
+    cancelDeleteConfirm();
+    delFooterStatus('', '');
+    await loadUserList();
+};
+
+window.closeDeleteUserModal = function() {
+    document.getElementById('del-overlay').classList.remove('active');
+    pendingDeleteUid = null; pendingDeleteUnitId = null; pendingDeleteName = null;
+};
+
+async function loadUserList() {
+    const listEl = document.getElementById('del-user-list');
+    listEl.innerHTML = '<div class="del-loading">⏳ Loading registered users...</div>';
+    try {
+        const snap = await getDocs(collection(db, 'users'));
+        allUsersCache = [];
+        snap.forEach(d => {
+            const data = d.data();
+            if (data.role !== 'admin') allUsersCache.push({ uid: d.id, ...data });
+        });
+        renderDelUserList(allUsersCache);
+    } catch(e) {
+        listEl.innerHTML = `<div class="del-empty" style="color:#ff4d4d;">⚠ Failed to load users: ${e.message}</div>`;
+    }
+}
+
+function renderDelUserList(users) {
+    const listEl = document.getElementById('del-user-list');
+    if (users.length === 0) {
+        listEl.innerHTML = '<div class="del-empty">No operator accounts found.</div>';
+        return;
+    }
+    listEl.innerHTML = users.map(u => {
+        const typeEmoji = u.vehicleType === 'firetruck' ? '🚒' : u.vehicleType === 'ambulance' ? '🚑' : '👤';
+        const regDate   = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-PH') : 'N/A';
+        return `
+        <div class="del-user-card" id="del-card-${u.uid}">
+            <div class="del-user-avatar">${typeEmoji}</div>
+            <div class="del-user-info">
+                <div class="del-user-name">${escHtml(u.name || 'Unknown')}</div>
+                <div class="del-user-email">${escHtml(u.email || '')}</div>
+                <div class="del-user-meta">Registered: ${regDate} &nbsp;|&nbsp; Station: ${escHtml(u.station||'N/A')}</div>
+            </div>
+            ${u.unitId ? `<span class="del-unit-badge">${escHtml(u.unitId)}</span>` : ''}
+            <button class="del-btn" onclick="promptDeleteUser('${u.uid}','${escHtml(u.unitId||'')}','${escHtml(u.name||'User')}')">
+                🗑 Delete
+            </button>
+        </div>`;
+    }).join('');
+}
+
+window.filterDelUsers = function() {
+    const q = document.getElementById('del-search-input').value.trim().toLowerCase();
+    if (!q) { renderDelUserList(allUsersCache); return; }
+    const filtered = allUsersCache.filter(u =>
+        (u.name||'').toLowerCase().includes(q) ||
+        (u.email||'').toLowerCase().includes(q) ||
+        (u.unitId||'').toLowerCase().includes(q)
+    );
+    renderDelUserList(filtered);
+};
+
+window.promptDeleteUser = function(uid, unitId, name) {
+    pendingDeleteUid    = uid;
+    pendingDeleteUnitId = unitId;
+    pendingDeleteName   = name;
+    document.getElementById('del-confirm-name').textContent = name;
+    const confirmText = `You are about to permanently delete the account of "${name}"` +
+        (unitId ? ` (Unit: ${unitId})` : '') +
+        `. Their Firestore records will be removed. This cannot be undone.`;
+    document.getElementById('del-confirm-text').innerHTML = confirmText;
+    document.getElementById('del-confirm-box').classList.add('active');
+    document.getElementById('del-confirm-yes-btn').disabled = false;
+    delFooterStatus('', '');
+};
+
+window.cancelDeleteConfirm = function() {
+    pendingDeleteUid = null; pendingDeleteUnitId = null; pendingDeleteName = null;
+    document.getElementById('del-confirm-box').classList.remove('active');
+};
+
+window.confirmDeleteUser = async function() {
+    if (!pendingDeleteUid) return;
+    const btn = document.getElementById('del-confirm-yes-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Deleting...';
+
+    try {
+        // 1. Delete user doc from /users/{uid}
+        await deleteDoc(doc(db, 'users', pendingDeleteUid));
+
+        // 2. Delete vehicle doc from /vehicles/{unitId} if exists
+        if (pendingDeleteUnitId) {
+            try { await deleteDoc(doc(db, 'vehicles', pendingDeleteUnitId)); } catch(e) { /* ok if not found */ }
+        }
+
+        // NOTE: Deleting from Firebase Auth requires Admin SDK (server-side).
+        // The user's Auth account will become orphaned — they can no longer log in
+        // since their Firestore profile is removed, effectively blocking access.
+        // For full Auth deletion, call a Cloud Function or Firebase Admin SDK endpoint.
+
+        delFooterStatus('ok', `✓ "${pendingDeleteName}" has been removed from the system.`);
+
+        // Remove card from UI
+        const card = document.getElementById(`del-card-${pendingDeleteUid}`);
+        if (card) { card.style.opacity='0'; card.style.transition='opacity 0.4s'; setTimeout(()=>card.remove(),400); }
+
+        // Remove from cache
+        allUsersCache = allUsersCache.filter(u => u.uid !== pendingDeleteUid);
+
+        cancelDeleteConfirm();
+    } catch(e) {
+        btn.disabled = false;
+        btn.textContent = '⚠ YES, DELETE';
+        delFooterStatus('err', `⚠ Delete failed: ${e.message}`);
+    }
+};
+
+function delFooterStatus(type, msg) {
+    const el = document.getElementById('del-footer-status');
+    el.className = `del-footer-status${type ? ' ' + type : ''}`;
+    el.textContent = msg;
+}
+
+function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 </script>
 </body>
 </html>
