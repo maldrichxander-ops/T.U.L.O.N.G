@@ -768,9 +768,17 @@ let incidentData = {}, incCounts = {fire:0, med:0};
 const incidentMarkers = {};
 
 try {
-    const bc = new BroadcastChannel('tulong_incidents');
-    bc.onmessage = e => { if (e.data?.type==='incident_update') syncIncidents(e.data.payload); };
-} catch(_) {}
+    import { collection, onSnapshot } from "firebase/firestore";
+
+onSnapshot(collection(db, "incidents"), snapshot => {
+    const payload = {};
+
+    snapshot.forEach(doc => {
+        payload[doc.id] = doc.data();
+    });
+
+    syncIncidents(payload);
+}); catch(_) {}
 
 function syncIncidents(payload) {
     if (!payload) return;
