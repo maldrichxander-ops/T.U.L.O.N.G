@@ -416,14 +416,30 @@ body {
 <!-- FIREBASE — login/auth only, no database -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-const app  = initializeApp({
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+  getAuth, onAuthStateChanged, signOut 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+import { 
+  getFirestore, collection, addDoc 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const app = initializeApp({
     apiKey: "AIzaSyDtYoKpqYE8MDc1dbZANQWwLxpp-heTBr8",
     authDomain: "tulongtech-7de22.firebaseapp.com",
     projectId: "tulongtech-7de22",
     storageBucket: "tulongtech-7de22.firebasestorage.app",
     messagingSenderId: "924023247315",
     appId: "1:924023247315:web:45f4d22dc0e6c8436f1f26"
+});
+
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+window.firebaseSignOut = () => signOut(auth);
+onAuthStateChanged(auth, user => {
+    if (!user) window.location.href = 'login.html';
 });
 const auth = getAuth(app);
 window.firebaseSignOut = () => signOut(auth);
@@ -709,20 +725,63 @@ map.on('click', async function(e) {
     reportBtn.classList.remove('report-active'); map.getContainer().style.cursor='';
 });
 
-window.placeIncident = function(type,lat,lng,address) {
+window.placeIncident = async function(type,lat,lng,address) {
+
     const now = new Date();
-    if (now.toDateString()!==lastResetDate) { incidentCounter=1; lastResetDate=now.toDateString(); }
+
+    const incident = {
+        type: type,
+        lat: lat,
+        lng: lng,
+        address: address,
+        status: "For Verification",
+        alarm: "N/A",
+        isResolved: false,
+        createdAt: Date.now()
+    };
+
+    // ✅ SAVE TO FIRESTORE (THIS FIXES YOUR PROBLEM)
+    try {
+        await addDoc(collection(db, "incidents"), incident);
+        console.log("🔥 Incident saved to Firebase");
+    } catch (e) {
+        console.error("Error saving incident:", e);
+    }
+
+    // ===== YOUR ORIGINAL CODE BELOW (DO NOT REMOVE) =====
+    if (now.toDateString()!==lastResetDate) {
+        incidentCounter=1;
+        lastResetDate=now.toDateString();
+    }
+
     const id = `INC-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(incidentCounter).padStart(5,'0')}`;
     incidentCounter++;
-    const marker = L.marker([lat,lng],{ icon: L.divIcon({
-        html:`<div id="icon-inner-${id}" style="text-align:center;"><div style="font-size:30px;">${type==='fire'?'🔥':'⚕️'}</div><div id="label-${id}" style="background:rgba(0,0,0,0.8);color:white;font-size:10px;font-weight:bold;padding:2px 4px;border-radius:3px;white-space:nowrap;display:none;border:1px solid #4da3ff;"></div></div>`,
-        className:'incident-marker', iconSize:[40,50], iconAnchor:[20,25]
-    })}).addTo(map);
-    activeIncidentMarkers[id]={ marker,type,lat,lng,address,startTime:now,
+
+    const marker = L.marker([lat,lng],{
+        icon: L.divIcon({
+            html:`<div id="icon-inner-${id}" style="text-align:center;">
+                <div style="font-size:30px;">${type==='fire'?'🔥':'⚕️'}</div>
+            </div>`,
+            className:'incident-marker',
+            iconSize:[40,50],
+            iconAnchor:[20,25]
+        })
+    }).addTo(map);
+
+    activeIncidentMarkers[id] = {
+        marker, type, lat, lng, address,
+        startTime: now,
         timeline:[`[${now.toLocaleTimeString()}] For Verification`],
-        status:"For Verification", alarm:"N/A", isResolved:false };
-    if(type==='fire') incidentCounts.fire++; else incidentCounts.med++;
-    updateGlobalStats(); updatePopup(id);
+        status:"For Verification",
+        alarm:"N/A",
+        isResolved:false
+    };
+
+    if(type==='fire') incidentCounts.fire++;
+    else incidentCounts.med++;
+
+    updateGlobalStats();
+    updatePopup(id);
 };
 
 window.updatePopup = function(id) {
