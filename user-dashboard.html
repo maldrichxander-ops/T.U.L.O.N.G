@@ -414,6 +414,7 @@ const app  = initializeApp({
 });
 const auth = getAuth(app);
 const db   = getFirestore(app);
+window.db = db;
 window._fbSignOut = () => signOut(auth);
 
 onAuthStateChanged(auth, async user => {
@@ -767,19 +768,6 @@ document.getElementById('stat-stations').textContent = STATIONS.length;
 let incidentData = {}, incCounts = {fire:0, med:0};
 const incidentMarkers = {};
 
-try {
-    import { collection, onSnapshot } from "firebase/firestore";
-
-onSnapshot(collection(db, "incidents"), snapshot => {
-    const payload = {};
-
-    snapshot.forEach(doc => {
-        payload[doc.id] = doc.data();
-    });
-
-    syncIncidents(payload);
-}); catch(_) {}
-
 function syncIncidents(payload) {
     if (!payload) return;
     incidentData = payload;
@@ -805,6 +793,21 @@ function syncIncidents(payload) {
     renderIncidentLists();
     updateStats();
 }
+    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js")
+.then(({ collection, onSnapshot }) => {
+
+    onSnapshot(collection(window.db, "incidents"), snapshot => {
+        const payload = {};
+
+        snapshot.forEach(doc => {
+            payload[doc.id] = doc.data();
+        });
+
+        syncIncidents(payload);
+    });
+
+})
+.catch(err => console.error("Firestore load error:", err));
 
 function renderIncidentLists() {
     const active = Object.entries(incidentData).filter(([,d])=>!d.isResolved);
