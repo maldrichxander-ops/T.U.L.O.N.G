@@ -349,7 +349,18 @@ window.exportToExcel = function() {
     const med  = log.filter(i => i["Initial Type"] === "MED");
     if (fire.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fire), "Fire Incidents");
     if (med.length)  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(med),  "Medical Incidents");
-    XLSX.writeFile(wb, `TULONG_Report_${new Date().toLocaleDateString('en-PH').replace(/\//g,'-')}.xlsx`);
+
+    // ← CHANGED: use writeXLSX + Blob URL instead of writeFile
+    const wbOut  = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob   = new Blob([wbOut], { type: 'application/octet-stream' });
+    const url    = URL.createObjectURL(blob);
+    const a      = document.createElement('a');
+    a.href       = url;
+    a.download   = `TULONG_Report_${new Date().toLocaleDateString('en-PH').replace(/\//g,'-')}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
 };
 
 // ── WIPE MAP & EXPORT — logs ALL remaining active incidents first ──
