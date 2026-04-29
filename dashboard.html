@@ -341,10 +341,32 @@ window.exportToExcel = function() {
     XLSX.writeFile(wb,`TULONG_Report_${new Date().toLocaleDateString()}.xlsx`);
 };
 window.wipeMapAndExport = async function() {
-    if(!confirm("⚠️ WIPE ALL ACTIVE INCIDENTS?")) return;
+    if (!confirm("⚠️ WIPE ALL INCIDENTS FROM MAP?\nThis will clear ALL markers on both Admin and User dashboards.\nExport will be downloaded first.")) return;
+
+    // 1. Export first
     window.exportToExcel();
-    for(const [id,e] of Object.entries(window.activeIncidentMarkers||{})){if(!e.isResolved) await window._fsDelete(id);}
-    window.dailyReportLog=[];
+
+    // 2. Collect ALL IDs (resolved + unresolved)
+    const allIds = Object.keys(window.activeIncidentMarkers || {});
+    if (!allIds.length) { alert("Map is already clear."); return; }
+
+    // 3. Remove markers from admin map immediately (no waiting for Firestore)
+    for (const id of allIds) {
+        const e = window.activeIncidentMarkers[id];
+        if (e && e.marker && window._lmap) window._lmap.removeLayer(e.marker);
+    }
+    window.activeIncidentMarkers = {};
+    window.incidentCounts = { fire: 0, med: 0 };
+    if (window._updateStats) window._updateStats();
+
+    // 4. Delete all from Firestore → triggers onSnapshot on user dashboard too
+    for (const id of allIds) {
+        try { await window._fsDelete(id); } catch(err) { console.error('Delete failed:', id, err); }
+    }
+
+    // 5. Cleanup
+    window.dailyReportLog = [];
+    if (window._lmap) window._lmap.closePopup();
 };
 
 // ── REGISTER VEHICLE / USER ────────────────────────────────
