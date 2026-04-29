@@ -308,22 +308,26 @@ window.logAlarm = function(id) {
     if(v==='Fire Out') fields.isResolved=true;
     window._fsUpdate(id,fields);
 };
-window.resolveIncident = function(id) {
-    const e=window.activeIncidentMarkers[id];
-    if(!e||e.isResolved) return;
-    const end=new Date(), ms=end-(e.createdAtMs||0);
-    window.dailyReportLog=window.dailyReportLog||[];
+window.deleteIncident = function(id) {
+    const e = window.activeIncidentMarkers[id];
+    if (!e) return;
+    if (!confirm(`Delete this ${e.type === 'fire' ? '🔥 FIRE' : '⚕️ MEDICAL'} incident?\nLocation: ${e.address || 'Unknown'}\n\nThis will be logged as DELETED in the report.`)) return;
+
+    // Log it before deleting
+    const now = new Date(), ms = now - (e.createdAtMs || 0);
+    window.dailyReportLog = window.dailyReportLog || [];
     window.dailyReportLog.push({
-        "Incident ID":e.localId||id, "Initial Type":e.type==='fire'?'FIRE':'MED',
-        "Specific Location":e.address||'Unknown',
-        "Reported":e.createdAtMs?new Date(e.createdAtMs).toLocaleTimeString():'—',
-        "Resolved":end.toLocaleTimeString(),
-        "Duration":`${Math.floor(ms/60000)}m ${Math.floor((ms%60000)/1000)}s`,
-        "Classification":e.status, "Final Alarm":e.alarm||'N/A',
-        "Progression Timeline":(e.timeline||[]).join(' \n ')
+        "Incident ID":          e.localId || id,
+        "Initial Type":         e.type === 'fire' ? 'FIRE' : 'MED',
+        "Specific Location":    e.address || 'Unknown',
+        "Reported":             e.createdAtMs ? new Date(e.createdAtMs).toLocaleTimeString() : '—',
+        "Resolved":             '— DELETED —',
+        "Duration":             `${Math.floor(ms/60000)}m ${Math.floor((ms%60000)/1000)}s`,
+        "Classification":       e.status || 'N/A',
+        "Final Alarm":          e.alarm || 'N/A',
+        "Progression Timeline": (e.timeline || []).join(' \n ')
     });
-    window._fsUpdate(id,{isResolved:true});
-    window._lmap.closePopup();
+    window._fsDelete(id);
 };
 window.deleteIncident = function(id) {
     if(window.activeIncidentMarkers[id]) window._fsDelete(id);
