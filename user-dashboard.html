@@ -32,14 +32,10 @@ html, body {
     font-family: 'Open Sans', sans-serif;
     -webkit-tap-highlight-color: transparent;
 }
-
-/* scanline texture */
 body::before {
     content:''; position:fixed; inset:0; pointer-events:none; z-index:9998;
     background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
 }
-
-/* ── HEADER ─────────────────────────────────────────── */
 .header {
     position: fixed; top:0; left:0; right:0; height: var(--hdr-h);
     z-index: 1000;
@@ -67,7 +63,7 @@ body::before {
 .hdr-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
 .hdr-clock {
     font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700;
-    letter-spacing:3px; color:#fff; display:none; /* hidden on smallest screens */
+    letter-spacing:3px; color:#fff; display:none;
 }
 .user-mini {
     display:flex; align-items:center; gap:7px;
@@ -89,16 +85,13 @@ body::before {
     text-transform:uppercase; transition:all 0.2s; white-space:nowrap;
 }
 .logout-btn-hdr:hover { background:rgba(255,77,77,0.2); }
-
-/* ── STATS RIBBON (horizontal scroll) ─────────────── */
 .stats-ribbon {
     position: fixed; top: var(--hdr-h); left:0; right:0;
     height: 50px; z-index: 900;
     background: var(--panel); border-bottom:1px solid var(--border);
     display: flex; align-items:stretch;
     overflow-x: auto; overflow-y:hidden;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
 .stats-ribbon::-webkit-scrollbar { display:none; }
 .stat-pill {
@@ -115,8 +108,6 @@ body::before {
 .stat-num.blue   { color:var(--accent); }
 .stat-num.green  { color:var(--green); }
 .stat-num.yellow { color:var(--yellow); }
-
-/* ── PAGE LAYOUT ─────────────────────────────────── */
 .page-container {
     position: fixed;
     top: calc(var(--hdr-h) + 50px);
@@ -124,16 +115,12 @@ body::before {
     left: 0; right: 0;
     overflow: hidden;
 }
-
-/* ── TAB VIEWS ─────────────────────────────────── */
 .tab-view {
     position: absolute; inset:0;
     display: none; flex-direction:column;
     overflow: hidden;
 }
 .tab-view.active { display:flex; }
-
-/* MAP TAB */
 #tab-map { position:relative; }
 #map { width:100%; height:100%; }
 .map-blynk-bar {
@@ -155,16 +142,12 @@ body::before {
 .ov-label { font-size:10px; color:var(--text); }
 .ov-val { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; }
 .ov-divider { border:0; border-top:1px solid var(--border); margin:8px 0; }
-
-/* SCROLLABLE PANEL CONTENT */
 .panel-scroll {
     flex:1; overflow-y:auto; padding:10px;
     -webkit-overflow-scrolling: touch;
 }
 .panel-scroll::-webkit-scrollbar { width:2px; }
 .panel-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
-
-/* Section headers inside panels */
 .section-hdr {
     font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700;
     letter-spacing:2px; text-transform:uppercase; color:var(--accent);
@@ -176,8 +159,6 @@ body::before {
     font-size:10px; background:rgba(26,140,255,0.15); color:var(--accent);
     padding:1px 8px; border-radius:10px; font-weight:700;
 }
-
-/* ── UNIT CARDS ─────────────────────────────────── */
 .unit-card {
     background:var(--card); border:1px solid var(--border);
     border-left:3px solid var(--border);
@@ -201,8 +182,6 @@ body::before {
 .badge-offline    { background:rgba(74,85,104,.2);   color:var(--muted); }
 .uc-type { font-size:10px; color:var(--muted); margin-top:3px; }
 .uc-gps  { font-size:9px; color:#3a5a7a; margin-top:2px; font-family:'Courier New',monospace; }
-
-/* ── MY VEHICLE CARD ─────────────────────────────── */
 .my-vehicle-card {
     background: linear-gradient(135deg,rgba(26,140,255,.07),rgba(26,140,255,.02));
     border:1px solid rgba(26,140,255,.25); border-radius:9px;
@@ -229,8 +208,6 @@ body::before {
 .mv-status-btn.active-standby    { border-color:var(--green); color:var(--green); background:rgba(39,174,96,.1); }
 .mv-status-btn.active-responding { border-color:var(--amber); color:var(--amber); background:rgba(240,136,62,.1); }
 .mv-status-btn.active-arrived    { border-color:var(--red);   color:var(--red);   background:rgba(255,77,77,.1); }
-
-/* ── PULSE DOTS ─────────────────────────────────── */
 .pulse-dot {
     display:inline-block; width:6px; height:6px; border-radius:50%;
     background:var(--green); vertical-align:middle;
@@ -245,8 +222,6 @@ body::before {
     0%,100% { opacity:1; box-shadow:0 0 4px var(--amber); }
     50%      { opacity:.4; }
 }
-
-/* ── INCIDENT ITEMS ─────────────────────────────── */
 .incident-item {
     background:var(--card); border:1px solid var(--border); border-radius:7px;
     padding:10px 12px; margin-bottom:7px; cursor:pointer; transition:all 0.15s;
@@ -263,8 +238,6 @@ body::before {
     font-size:9px; padding:2px 8px; border-radius:10px; font-weight:600;
     background:rgba(255,204,0,.1); color:var(--yellow); border:1px solid rgba(255,204,0,.2);
 }
-
-/* ── STATION ITEMS ─────────────────────────────── */
 .station-item {
     background:var(--card); border:1px solid var(--border); border-radius:7px;
     padding:10px 12px; margin-bottom:7px; cursor:pointer; transition:all 0.15s;
@@ -278,12 +251,8 @@ body::before {
 }
 .stn-bfp { background:rgba(255,77,77,.15);  color:var(--red); }
 .stn-vol { background:rgba(26,140,255,.15); color:var(--accent); }
-
-/* ── EMPTY STATE ─────────────────────────────────── */
 .empty-state { text-align:center; padding:28px 12px; color:var(--muted); font-size:11px; }
 .empty-state-icon { font-size:28px; margin-bottom:8px; opacity:.4; }
-
-/* ── BOTTOM NAV ─────────────────────────────────── */
 .bottom-nav {
     position: fixed; bottom:0; left:0; right:0;
     height: var(--nav-h); z-index:1001;
@@ -319,8 +288,6 @@ body::before {
     align-items:center; justify-content:center;
 }
 .nav-badge.visible { display:flex; }
-
-/* ── TOAST ─────────────────────────────────────── */
 .toast-container {
     position:fixed; top:calc(var(--hdr-h) + 56px); right:10px;
     z-index:9999; display:flex; flex-direction:column; gap:6px; pointer-events:none;
@@ -338,14 +305,9 @@ body::before {
 @keyframes toastIn { from{transform:translateX(110%);opacity:0;} to{transform:translateX(0);opacity:1;} }
 .toast-title { font-size:12px; font-weight:700; margin-bottom:2px; }
 .toast-body  { font-size:10px; color:var(--muted); }
-
-/* ── LEAFLET POPUP ─────────────────────────────── */
 .leaflet-popup-content-wrapper { background:#030f20 !important; border:1px solid #1a8cff44 !important; color:#c9d1d9 !important; border-radius:8px !important; }
 .leaflet-popup-tip { background:#030f20 !important; }
 
-/* ══════════════════════════════════════════════════
-   DESKTOP: restore original side-panel layout
-   ══════════════════════════════════════════════════ */
 @media (min-width: 768px) {
     :root { --hdr-h: 64px; --nav-h: 0px; }
     .hdr-clock { display:block; }
@@ -356,8 +318,6 @@ body::before {
     }
     .tab-view { position:relative; display:none !important; }
     #tab-map  { display:flex !important; flex:1; }
-
-    /* Desktop right panel — always visible */
     .desktop-right {
         display:flex !important;
         width:280px; flex-shrink:0;
@@ -390,33 +350,37 @@ body::before {
     .stats-ribbon .stat-pill { padding:0 20px; }
     .stats-ribbon { overflow-x:hidden; }
 }
-@media (min-width:768px) {
-    .desktop-right { display:flex; }
-}
 .desktop-right { display:none; }
 </style>
 </head>
 <body>
 
-<!-- FIREBASE AUTH -->
+<!-- ══════════════════════════════════════════════════════
+     FIREBASE MODULE — Auth + Firestore incident listener
+     Everything Firebase lives here in ONE module block.
+     ══════════════════════════════════════════════════════ -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut }
+                                from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, onSnapshot }
+                                from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const app  = initializeApp({
-    apiKey: "AIzaSyDtYoKpqYE8MDc1dbZANQWwLxpp-heTBr8",
-    authDomain: "tulongtech-7de22.firebaseapp.com",
-    projectId: "tulongtech-7de22",
-    storageBucket: "tulongtech-7de22.firebasestorage.app",
+    apiKey:            "AIzaSyDtYoKpqYE8MDc1dbZANQWwLxpp-heTBr8",
+    authDomain:        "tulongtech-7de22.firebaseapp.com",
+    projectId:         "tulongtech-7de22",
+    storageBucket:     "tulongtech-7de22.firebasestorage.app",
     messagingSenderId: "924023247315",
-    appId: "1:924023247315:web:45f4d22dc0e6c8436f1f26"
+    appId:             "1:924023247315:web:45f4d22dc0e6c8436f1f26"
 });
 const auth = getAuth(app);
 const db   = getFirestore(app);
-window.db = db;
+
+// ── Sign-out helper (called from regular script) ──────────
 window._fbSignOut = () => signOut(auth);
 
+// ── Auth guard ─────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
     if (!user) { window.location.href = 'login.html'; return; }
     try {
@@ -433,6 +397,83 @@ onAuthStateChanged(auth, async user => {
         window.dispatchEvent(new Event('userReady'));
     }
 });
+
+// ══════════════════════════════════════════════════════════
+// INCIDENT REAL-TIME LISTENER
+// Fires whenever admin adds / changes / deletes an incident.
+// Updates map markers AND all UI panels automatically.
+// ══════════════════════════════════════════════════════════
+window._incidentData    = {};   // shared with regular script
+window._incidentMarkers = {};   // Leaflet markers keyed by Firestore doc ID
+
+onSnapshot(collection(db, 'incidents'), snapshot => {
+    snapshot.docChanges().forEach(change => {
+        const id = change.doc.id;
+        const d  = change.doc.data();
+
+        if (change.type === 'added' || change.type === 'modified') {
+            // Store latest data
+            window._incidentData[id] = d;
+            _upsertIncidentMarker(id, d);
+        }
+
+        if (change.type === 'removed') {
+            delete window._incidentData[id];
+            const m = window._incidentMarkers[id];
+            if (m && window._lmap) { window._lmap.removeLayer(m); }
+            delete window._incidentMarkers[id];
+        }
+    });
+
+    // Notify regular script to re-render panels
+    window.dispatchEvent(new Event('incidentsUpdated'));
+});
+
+function _upsertIncidentMarker(id, d) {
+    // Wait until the map is ready
+    if (!window._lmap) {
+        setTimeout(() => _upsertIncidentMarker(id, d), 300);
+        return;
+    }
+
+    const isResolved = !!d.isResolved;
+    const emoji      = d.type === 'fire' ? '🔥' : '⚕️';
+    const typeLabel  = d.type === 'fire' ? 'FIRE' : 'MEDICAL';
+
+    const icon = L.divIcon({
+        html: `<div style="text-align:center;${isResolved ? 'filter:grayscale(1) opacity(.45)' : ''}">
+                   <div style="font-size:26px;line-height:1;">${emoji}</div>
+                   <div style="background:rgba(0,0,0,.82);color:white;font-size:9px;
+                               font-weight:700;padding:1px 5px;border-radius:3px;
+                               white-space:nowrap;border:1px solid ${d.type==='fire'?'#ff6633':'#1a8cff'};">
+                       ${isResolved ? '✔ DONE' : typeLabel}
+                   </div>
+               </div>`,
+        className: 'incident-marker',
+        iconSize:  [36, 48],
+        iconAnchor:[18, 24]
+    });
+
+    const popupHtml = `
+        <div style="color:#c9d1d9;min-width:170px;">
+            <b style="color:#fff;">${emoji} ${typeLabel} ${isResolved ? '(Resolved)' : ''}</b><br>
+            <small style="color:#8b949e;">${d.address || 'Location pending'}</small>
+            <hr style="border-color:#1a3a5c;margin:6px 0;">
+            <span style="font-size:10px;">Status: <b style="color:#ffcc00;">${d.status || 'N/A'}</b></span><br>
+            ${d.alarm && d.alarm !== 'N/A' ? `<span style="font-size:10px;">Alarm: <b style="color:#f0883e;">${d.alarm}</b></span>` : ''}
+        </div>`;
+
+    const existing = window._incidentMarkers[id];
+    if (existing) {
+        existing.setLatLng([d.lat, d.lng]);
+        existing.setIcon(icon);
+        existing.setPopupContent(popupHtml);
+    } else {
+        window._incidentMarkers[id] = L.marker([d.lat, d.lng], { icon })
+            .addTo(window._lmap)
+            .bindPopup(popupHtml);
+    }
+}
 </script>
 
 <!-- ── HEADER ──────────────────────────────────────── -->
@@ -488,7 +529,7 @@ onAuthStateChanged(auth, async user => {
     <div class="stat-pill">
         <div class="stat-icon">🏥</div>
         <div>
-            <div class="stat-num green" id="stat-stations">20</div>
+            <div class="stat-num green" id="stat-stations">0</div>
             <div class="stat-lbl">Stations</div>
         </div>
     </div>
@@ -504,7 +545,7 @@ onAuthStateChanged(auth, async user => {
 <!-- ── PAGE CONTAINER ─────────────────────────────── -->
 <div class="page-container">
 
-    <!-- MAP TAB (always visible on desktop) -->
+    <!-- MAP TAB -->
     <div class="tab-view active" id="tab-map">
         <div id="map" style="width:100%;height:100%;"></div>
         <div class="map-blynk-bar">
@@ -516,7 +557,6 @@ onAuthStateChanged(auth, async user => {
     <!-- UNITS TAB (mobile) -->
     <div class="tab-view" id="tab-units">
         <div class="panel-scroll">
-            <!-- My Vehicle -->
             <div id="mv-section-mobile" style="display:none;">
                 <div class="section-hdr">&#9632; My Vehicle <span id="mv-unit-badge-m" class="section-count">---</span></div>
                 <div class="my-vehicle-card" id="mv-card-mobile">
@@ -534,7 +574,6 @@ onAuthStateChanged(auth, async user => {
                     </div>
                 </div>
             </div>
-            <!-- All Units -->
             <div class="section-hdr">
                 <span><span class="pulse-dot" style="margin-right:5px;"></span>Live Units</span>
                 <span class="section-count" id="unit-count-badge-m">0</span>
@@ -559,14 +598,13 @@ onAuthStateChanged(auth, async user => {
     <!-- STATIONS TAB (mobile) -->
     <div class="tab-view" id="tab-stations">
         <div class="panel-scroll">
-            <div class="section-hdr">&#x1F3E5; Fire Stations <span class="section-count">20</span></div>
+            <div class="section-hdr">&#x1F3E5; Fire Stations <span class="section-count" id="stat-stations-lbl">0</span></div>
             <div id="station-list-mobile"></div>
         </div>
     </div>
 
     <!-- ── DESKTOP RIGHT PANEL ───────────────────── -->
     <div class="desktop-right">
-        <!-- My Vehicle (desktop) -->
         <div class="desktop-section" id="mv-section-desktop" style="display:none;">
             <div class="desktop-panel-hdr">
                 <div class="desktop-panel-hdr-title">&#128663; My Vehicle</div>
@@ -594,7 +632,6 @@ onAuthStateChanged(auth, async user => {
             </div>
         </div>
 
-        <!-- Live Units (desktop) -->
         <div class="desktop-section" style="height:200px;">
             <div class="desktop-panel-hdr">
                 <div class="desktop-panel-hdr-title"><span class="pulse-dot" style="margin-right:4px;"></span>Live Units</div>
@@ -603,7 +640,6 @@ onAuthStateChanged(auth, async user => {
             <div class="desktop-scroll"><div id="unit-list-desktop"></div></div>
         </div>
 
-        <!-- Incidents (desktop) -->
         <div class="desktop-section" style="height:190px;">
             <div class="desktop-panel-hdr">
                 <div class="desktop-panel-hdr-title"><span class="pulse-dot amber" style="margin-right:4px;"></span>Incidents</div>
@@ -616,11 +652,10 @@ onAuthStateChanged(auth, async user => {
             </div>
         </div>
 
-        <!-- Stations (desktop) -->
         <div class="desktop-section grow">
             <div class="desktop-panel-hdr">
                 <div class="desktop-panel-hdr-title">&#x1F3E5; Stations</div>
-                <div class="desktop-count">20</div>
+                <div class="desktop-count" id="station-count-d">0</div>
             </div>
             <div class="desktop-scroll"><div id="station-list-desktop"></div></div>
         </div>
@@ -648,7 +683,6 @@ onAuthStateChanged(auth, async user => {
     </button>
 </nav>
 
-<!-- TOAST -->
 <div class="toast-container" id="toast-container"></div>
 
 <script>
@@ -656,23 +690,20 @@ onAuthStateChanged(auth, async user => {
 // CLOCK
 // ══════════════════════════════════════════════════════
 function updateClock() {
-    const now = new Date();
     const el = document.getElementById('clock');
-    if (el) el.textContent = now.toLocaleTimeString('en-PH',{hour12:false});
+    if (el) el.textContent = new Date().toLocaleTimeString('en-PH',{hour12:false});
 }
 updateClock(); setInterval(updateClock, 1000);
 
 // ══════════════════════════════════════════════════════
 // TAB SWITCHING (mobile)
 // ══════════════════════════════════════════════════════
-let currentTab = 'map';
 function switchTab(tab) {
-    if (window.innerWidth >= 768) return; // desktop — no-op
+    if (window.innerWidth >= 768) return;
     document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
     document.getElementById('nav-' + tab).classList.add('active');
-    currentTab = tab;
     if (tab === 'map') setTimeout(() => map.invalidateSize(), 100);
 }
 
@@ -689,15 +720,16 @@ const V_STANDBY=4, V_RESPONDING=5, V_ARRIVED=6, V_LOCATION=7;
 let unitStates = {}, unitMarkers = {}, prevStates = {};
 
 // ══════════════════════════════════════════════════════
-// MAP INIT
+// MAP INIT — assign to window._lmap so the Firebase
+// module's _upsertIncidentMarker() can access it
 // ══════════════════════════════════════════════════════
 const map = L.map('map',{zoomControl:false}).setView([10.3157,123.8854],13);
+window._lmap = map;  // ← CRITICAL: makes incident markers work
 L.control.zoom({position:'bottomright'}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
     attribution:'&copy; OpenStreetMap &copy; CartoDB', subdomains:'abcd', maxZoom:19
 }).addTo(map);
 
-// Map overlay
 const mapOverlay = L.control({position:'topright'});
 mapOverlay.onAdd = function() {
     this._div = L.DomUtil.create('div','map-overlay-counter');
@@ -715,7 +747,7 @@ mapOverlay.update = function(trucks=0,ambs=0,fire=0,med=0) {
 };
 mapOverlay.addTo(map);
 
-const fireIcon = L.icon({iconUrl:"fireStation1.png",   iconSize:[26,26]});
+const fireIcon = L.icon({iconUrl:"fireStation1.png",      iconSize:[26,26]});
 const volIcon  = L.icon({iconUrl:"volunteerStation1.png", iconSize:[26,26]});
 
 // ══════════════════════════════════════════════════════
@@ -744,108 +776,79 @@ const STATIONS = [
     {name:"Bogo City Fire Station",           number:"(032) 434 8575",   lat:11.0506,   lng:124.0048,   type:"bfp"},
 ];
 
-// Build station lists (mobile + desktop) and add map markers
 const stationListM = document.getElementById('station-list-mobile');
 const stationListD = document.getElementById('station-list-desktop');
 STATIONS.forEach(s => {
     L.marker([s.lat,s.lng],{icon:s.type==='bfp'?fireIcon:volIcon})
      .addTo(map)
      .bindPopup(`<div style="color:#c9d1d9"><b style="color:#fff;">${s.name}</b><br>📞 ${s.number}</div>`);
-
     const html = `<div class="station-item" onclick="map.flyTo([${s.lat},${s.lng}],16);switchTab('map')">
         <div><span class="stn-type-badge ${s.type==='bfp'?'stn-bfp':'stn-vol'}">${s.type.toUpperCase()}</span></div>
         <div class="stn-name">${s.name}</div>
         <div class="stn-meta">📞 ${s.number}</div>
     </div>`;
     stationListM.insertAdjacentHTML('beforeend', html);
-    stationListD.insertAdjacentHTML('beforeend', html.replace(/switchTab\('map'\)/g,"").replace(/onclick="map/g,'onclick="map'));
+    stationListD.insertAdjacentHTML('beforeend', html);
 });
-document.getElementById('stat-stations').textContent = STATIONS.length;
+const sCount = STATIONS.length;
+document.getElementById('stat-stations').textContent     = sCount;
+document.getElementById('stat-stations-lbl').textContent = sCount;
+document.getElementById('station-count-d').textContent   = sCount;
 
 // ══════════════════════════════════════════════════════
-// INCIDENT SYNC (BroadcastChannel from main dashboard)
+// INCIDENT PANEL RENDERER
+// Called by the 'incidentsUpdated' event from the
+// Firebase module whenever Firestore data changes.
 // ══════════════════════════════════════════════════════
-let incidentData = {}, incCounts = {fire:0, med:0};
-const incidentMarkers = {};
+function renderIncidentPanels() {
+    const allData = window._incidentData || {};
+    const active  = Object.entries(allData).filter(([,d]) => !d.isResolved);
+    const fire    = active.filter(([,d]) => d.type === 'fire').length;
+    const med     = active.filter(([,d]) => d.type !== 'fire').length;
+    const count   = active.length;
 
-function syncIncidents(payload) {
-    if (!payload) return;
-    incidentData = payload;
-    incCounts = {fire:0, med:0};
-    for (const id in incidentMarkers) {
-        if (!incidentData[id]) { map.removeLayer(incidentMarkers[id]); delete incidentMarkers[id]; }
-    }
-    for (const id in incidentData) {
-        const d = incidentData[id];
-        if (!incidentMarkers[id]) {
-            incidentMarkers[id] = L.marker([d.lat,d.lng],{icon:L.divIcon({
-                html:`<div style="font-size:26px;">${d.type==='fire'?'🔥':'⚕️'}</div>`,
-                className:'', iconSize:[32,32], iconAnchor:[16,16]
-            })}).addTo(map)
-            .bindPopup(`<div style="color:#c9d1d9;min-width:150px;">
-                <b style="color:#fff;">${d.type.toUpperCase()} INCIDENT</b><br>
-                <small>${d.address||''}</small><br><br>
-                <span style="font-size:10px;color:#8b949e;">Status: ${d.status}</span>
-            </div>`);
-        }
-        if (!d.isResolved) { if (d.type==='fire') incCounts.fire++; else incCounts.med++; }
-    }
-    renderIncidentLists();
-    updateStats();
-}
-    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js")
-.then(({ collection, onSnapshot }) => {
+    // Stats ribbon
+    document.getElementById('stat-fire').textContent = fire;
+    document.getElementById('stat-med').textContent  = med;
 
-    onSnapshot(collection(window.db, "incidents"), snapshot => {
-        const payload = {};
-
-        snapshot.forEach(doc => {
-            payload[doc.id] = doc.data();
-        });
-
-        syncIncidents(payload);
-    });
-
-})
-.catch(err => console.error("Firestore load error:", err));
-
-function renderIncidentLists() {
-    const active = Object.entries(incidentData).filter(([,d])=>!d.isResolved);
-    const count  = active.length;
-
-    // Update badges
+    // Panel badges
     ['m','d'].forEach(sfx => {
         const el = document.getElementById('incident-count-badge-'+sfx);
         if (el) el.textContent = count;
     });
-    document.getElementById('stat-fire').textContent = incCounts.fire;
-    document.getElementById('stat-med').textContent  = incCounts.med;
 
     // Mobile nav badge
     const navBadge = document.getElementById('inc-badge');
     navBadge.textContent = count;
     navBadge.classList.toggle('visible', count > 0);
 
+    // Incident cards HTML
     const html = count === 0
         ? '<div class="empty-state"><div class="empty-state-icon">✅</div>No active incidents</div>'
-        : active.map(([id,d]) => `
+        : active.map(([id, d]) => `
             <div class="incident-item" onclick="map.flyTo([${d.lat},${d.lng}],16);switchTab('map')">
                 <div class="inc-top">
                     <div class="inc-type ${d.type}">${d.type==='fire'?'🔥 FIRE':'⚕️ MEDICAL'}</div>
-                    <div class="inc-id">${id}</div>
+                    <div class="inc-id">${d.localId||id}</div>
                 </div>
                 <div class="inc-addr">${d.address||'Location pending...'}</div>
                 <div class="inc-meta">
-                    <span class="inc-tag">${d.status}</span>
+                    <span class="inc-tag">${d.status||'N/A'}</span>
                     ${d.alarm&&d.alarm!=='N/A'?`<span class="inc-tag">${d.alarm}</span>`:''}
                 </div>
             </div>`).join('');
 
-    const elM = document.getElementById('incident-list-mobile');
-    const elD = document.getElementById('incident-list-desktop');
-    if (elM) elM.innerHTML = html;
-    if (elD) elD.innerHTML = html;
+    ['incident-list-mobile','incident-list-desktop'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+    });
+
+    // Also refresh map overlay
+    updateStats();
 }
+
+// Listen for the event fired by the Firebase module
+window.addEventListener('incidentsUpdated', renderIncidentPanels);
 
 // ══════════════════════════════════════════════════════
 // BLYNK UNIT FETCHING
@@ -855,7 +858,7 @@ async function fetchUnit(unit) {
         unitStates[unit.id]={online:false,type:unit.type}; return false;
     }
     try {
-        const connRes = await fetch(`${BLYNK_BASE}/isHardwareConnected?token=${unit.token}`);
+        const connRes  = await fetch(`${BLYNK_BASE}/isHardwareConnected?token=${unit.token}`);
         if (!connRes.ok) { setOffline(unit); return false; }
         const connText = await connRes.text();
         if (connText.toLowerCase().includes('invalid')||connText.trim()!=='true') { setOffline(unit); return false; }
@@ -950,39 +953,31 @@ function updateStats() {
     const ambs  =st.filter(s=>s.online&&s.type==='ambulance').length;
     document.getElementById('stat-trucks').textContent=trucks;
     document.getElementById('stat-ambs').textContent=ambs;
-    mapOverlay.update(trucks,ambs,incCounts.fire,incCounts.med);
+    const ic = window._incidentData || {};
+    const fire = Object.values(ic).filter(d=>!d.isResolved&&d.type==='fire').length;
+    const med  = Object.values(ic).filter(d=>!d.isResolved&&d.type!=='fire').length;
+    mapOverlay.update(trucks,ambs,fire,med);
     updateMyVehiclePanel();
 }
 
-// ══════════════════════════════════════════════════════
-// MY VEHICLE PANEL — updates both mobile & desktop
-// ══════════════════════════════════════════════════════
 function updateMyVehiclePanel() {
     const mv=window.myVehicle;
     if (!mv) return;
-
-    // Show both sections
     const secM=document.getElementById('mv-section-mobile');
     const secD=document.getElementById('mv-section-desktop');
     if(secM) secM.style.display='';
     if(secD) secD.style.display='';
-
     const unitId  = mv.unitId||'---';
     const typeStr = mv.type==='firetruck'?'🚒 Firetruck':'🚑 Ambulance';
     const station = mv.station||'---';
     const s       = unitStates[mv.unitId];
     const gps     = s?.lat&&s?.lon?`${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}`:'No Fix';
-
-    // Mobile fields
-    const mvIds=['mv-unit-badge-m','mv-id-m','mv-type-m','mv-station-m','mv-gps-m'];
-    const mvVals=[unitId,unitId,typeStr,station,gps];
-    mvIds.forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.textContent=mvVals[i]; });
-
-    // Desktop fields
-    const dvIds=['mv-unit-badge-d','mv-id-d','mv-type-d','mv-station-d','mv-gps-d'];
-    dvIds.forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.textContent=mvVals[i]; });
-
-    // Status buttons — both mobile and desktop
+    ['mv-unit-badge-m','mv-id-m','mv-type-m','mv-station-m','mv-gps-m'].forEach((id,i)=>{
+        const el=document.getElementById(id); if(el) el.textContent=[unitId,unitId,typeStr,station,gps][i];
+    });
+    ['mv-unit-badge-d','mv-id-d','mv-type-d','mv-station-d','mv-gps-d'].forEach((id,i)=>{
+        const el=document.getElementById(id); if(el) el.textContent=[unitId,unitId,typeStr,station,gps][i];
+    });
     ['standby','responding','arrived'].forEach(k => {
         ['m','d'].forEach(sfx => {
             const btn=document.getElementById(`mvb-${k}-${sfx}`);
@@ -994,7 +989,7 @@ function updateMyVehiclePanel() {
 }
 
 // ══════════════════════════════════════════════════════
-// POLL
+// POLL (Blynk units every 5 s)
 // ══════════════════════════════════════════════════════
 async function pollAll() {
     let anyOnline=false;
@@ -1043,11 +1038,10 @@ window.confirmLogout=function(){
 };
 
 // ══════════════════════════════════════════════════════
-// RESIZE HANDLER — fix map when switching orientations
+// RESIZE
 // ══════════════════════════════════════════════════════
 window.addEventListener('resize',()=>{
-    if(window.innerWidth>=768) {
-        // Desktop: ensure map tab is visible-ish
+    if(window.innerWidth>=768){
         document.querySelectorAll('.tab-view').forEach(v=>v.classList.remove('active'));
         document.getElementById('tab-map').classList.add('active');
     }
